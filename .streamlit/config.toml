@@ -1,0 +1,19 @@
+[theme]
+primaryColor = "#1D9E75"
+backgroundColor = "#F8F9FA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1A1A2E"
+font = "sans serif"
+
+[client]
+# Hides the Deploy button and developer menu items — this is a demo app, not a
+# dev environment. Set at the server level so it applies before first paint.
+toolbarMode = "minimal"
+showErrorDetails = false
+
+[server]
+headless = true
+port = 8501
+
+[browser]
+gatherUsageStats = false
