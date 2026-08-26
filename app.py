@@ -5,10 +5,12 @@ top-level `app` and runs it as a serverless function; the static design in
 public/ is served alongside it.
 """
 
+import os
 from datetime import date
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from api_lib import prompts
@@ -263,3 +265,14 @@ def report(req: ReportRequest):
             else 0,
         },
     }
+
+
+# --------------------------------------------------------------------------- #
+# Static design canvas
+#
+# Mounted last so every /api route above wins first. Vercel's FastAPI preset
+# routes all traffic to this app, so serving the frontend here is what makes
+# "/" work — relying on platform-level static handling would 404.
+# --------------------------------------------------------------------------- #
+_PUBLIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
+app.mount("/", StaticFiles(directory=_PUBLIC, html=True), name="static")
