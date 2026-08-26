@@ -4,6 +4,7 @@ __pycache__/
 .DS_Store
 *.egg-info/
 dist/
-.streamlit/secrets.toml
 venv/
 .venv/
+.vercel/
+.streamlit/secrets.toml

@@ -1,272 +1,265 @@
-"""TherapyNavigator — AI operations tools for pediatric therapy organizations.
+"""TherapyNavigator API.
 
-Entry point. Owns page config, shared chrome, and the top navigation; the four
-tools live in views/ and are wired up through st.navigation below.
+FastAPI backend for the four tools. Vercel's Python preset detects the
+top-level `app` and runs it as a serverless function; the static design in
+public/ is served alongside it.
 """
 
-from datetime import datetime, timedelta
+from datetime import date
 
-import streamlit as st
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
-from utils.claude_client import api_key_configured
-from utils.ui import LOGO_PATH, page_chrome, render_html
-
-st.set_page_config(
-    page_title="TherapyNavigator",
-    page_icon="🏥",
-    layout="wide",
-    initial_sidebar_state="collapsed",
+from api_lib import prompts
+from api_lib.claude_client import (
+    ClaudeError,
+    api_key_configured,
+    call_claude,
+    call_claude_messages,
 )
+from api_lib.parsing import bullets, has_secondary, numbered_items, parse_sections
 
-st.logo(LOGO_PATH, size="medium")
-page_chrome()
-
-DAY_EVENTS = [
-    ("1", "✚", "Emma · intake review", "Speech-Language"),
-    ("2", "✎", "Marcus · OT session", "Room 3 · Rachel L."),
-    ("3", "✉", "Waitlist batch send", "4 families · Warm"),
-    ("4", "♥", "Aisha · PT eval", "New patient · 60m"),
-    ("5", "◈", "Weekly report due", "Leadership recap"),
-]
-
-JOURNEY = [
-    ("1", "✚", "Family Intake",
-     "Match a child to the right therapy in plain, warm language. "
-     "Then send a welcome email.", "PLAIN LANGUAGE"),
-    ("2", "✉", "Waitlist Comms",
-     "Personalized status emails for everyone waiting. Nobody goes silent.",
-     "UP TO 10 AT ONCE"),
-    ("3", "☾", "Staff Assistant",
-     "A grounded chat over your clinic knowledge base. Evaluations, "
-     "insurance, phrasing.", "GROUNDED"),
-    ("4", "◈", "Weekly Report",
-     "Raw clinic numbers become a leadership-ready summary with "
-     "recommended actions.", "RATES CALCULATED"),
-]
-
-# Sample-week figures, the same ones the Report tool ships as demo data.
-TICKER = [
-    ("1", "+19", "NEW REFERRALS · SPEECH-HEAVY"),
-    ("2", "284", "APPOINTMENTS COMPLETED"),
-    ("3", "22", "AUTHS PENDING · 3 AGING"),
-]
-
-# The timeline track runs 8am to 6pm.
-TRACK_START, TRACK_END = 8, 18
+app = FastAPI(title="TherapyNavigator API", docs_url="/api/docs")
 
 
-def day_calendar():
-    """The canvas's 3D day widget, with today's date, clock and now-line live."""
-    now = datetime.now()
-    monday = now.date() - timedelta(days=now.weekday())
-
-    days = ""
-    for offset in range(7):
-        day = monday + timedelta(days=offset)
-        letter = "MTWTFSS"[offset]
-        classes = ["cw-day"]
-        marks = ""
-        if day == now.date():
-            classes.append("is-today")
-            marks = '<span class="pulse-dot"></span>'
-        elif offset >= 5:
-            classes.append("dim")
-        elif offset == 4:
-            marks = '<span class="due-mark">◈</span>'
-        days += (
-            '<div class="{}"><span class="d">{}</span>'
-            '<span class="n">{}</span>{}</div>'
-        ).format(" ".join(classes), letter, day.day, marks)
-
-    events = "".join(
-        '<div class="ev ev-{}"><span class="ev-ico">{}</span>'
-        "<b>{}</b><small>{}</small></div>".format(slot, icon, title, sub)
-        for slot, icon, title, sub in DAY_EVENTS
-    )
-
-    # Position the now-line within the 8am–6pm track. Outside clinic hours it
-    # clamps to the nearest edge rather than disappearing — the label carries
-    # the true time, and the marker is part of what makes the widget read.
-    hours = now.hour + now.minute / 60
-    pct = (hours - TRACK_START) / (TRACK_END - TRACK_START) * 100
-    pct = min(100.0, max(0.0, pct))
-    now_line = (
-        '<div class="now-line" style="top:{:.1f}%">'
-        '<span class="now-lbl">NOW · {}</span></div>'
-    ).format(pct, now.strftime("%-I:%M %p").lstrip("0"))
-
-    return """
-    <div class="hero-visual">
-      <div class="cal">
-        <div class="cal-layer-back"></div>
-        <div class="cal-head">
-          <div>
-            <div class="cal-month">{month}</div>
-            <div class="cal-today">{today}</div>
-          </div>
-          <div class="cal-clock">
-            <div class="cc-time">{clock}</div>
-            <div class="cc-meta">OAKLIN LANE · AUSTIN</div>
-          </div>
-        </div>
-        <div class="cal-week">{days}</div>
-        <div class="cal-body">
-          <div class="cal-timeline">
-            <div class="cal-hours">
-              <span>8</span><span>10</span><span>12</span>
-              <span>2</span><span>4</span><span>6</span>
-            </div>
-            <div class="cal-track">
-              <div class="cal-grid"></div>
-              {now_line}
-              {events}
-            </div>
-          </div>
-          <div class="cal-chart">
-            <div class="cc-eyebrow">THIS WEEK</div>
-            <div class="cc-num">284<em>↑ 2%</em></div>
-            <div class="cc-lbl">appointments completed</div>
-            <div class="cc-bars">
-              <div class="cc-bar" style="height:55%"></div>
-              <div class="cc-bar is-today" style="height:78%"></div>
-              <div class="cc-bar" style="height:42%"></div>
-              <div class="cc-bar" style="height:66%"></div>
-              <div class="cc-bar" style="height:88%"></div>
-            </div>
-            <div class="cc-bar-lbls">
-              <span>M</span><span class="on">T</span><span>W</span>
-              <span>T</span><span>F</span>
-            </div>
-          </div>
-        </div>
-        <div class="cal-foot">
-          <div class="cf-chip"><span class="dot" style="background:#D65A4A"></span>Intake</div>
-          <div class="cf-chip"><span class="dot" style="background:#C0D77A"></span>Sessions</div>
-          <div class="cf-chip"><span class="dot" style="background:#E5A5B0"></span>Comms</div>
-          <div class="cf-chip"><span class="dot" style="background:#F0995E"></span>Report</div>
-          <div class="cf-count">{count} events today</div>
-        </div>
-      </div>
-    </div>
-    """.format(
-        month=now.strftime("%B %Y").upper(),
-        today=now.strftime("%A %-d"),
-        clock=now.strftime("%-I:%M"),
-        days=days,
-        now_line=now_line,
-        events=events,
-        count=len(DAY_EVENTS),
-    )
+def fail(message, status=502):
+    return JSONResponse({"error": message}, status_code=status)
 
 
-def home():
-    """Landing page: hero + 3D day calendar, care journey, week ticker."""
-    render_html(
-        """
-        <div class="hero-grid">
-          <div>
-            <div class="hero-eyebrow"><span class="dot"></span>
-              Four tools · one calm place</div>
-            <h1 class="hero-h1">Care, in <em>motion.</em></h1>
-            <p>Everything the clinic asks of you — intake, outreach, answers
-            and reporting — in one considered workspace built for the small
-            moments that make a pediatric therapy practice feel
-            extraordinary.</p>
-            <div class="hero-actions">
-              <span class="btn-primary">Start a new intake
-                <span class="arrow">→</span></span>
-              <span class="btn-ghost">Open from the nav above</span>
-            </div>
-            <div class="hero-stats">
-              <div class="s"><div class="n">4</div><div class="l">TOOLS</div></div>
-              <div class="s"><div class="n">10</div><div class="l">FAMILIES PER BATCH</div></div>
-              <div class="s"><div class="n">0</div><div class="l">PATIENT DATA STORED</div></div>
-            </div>
-          </div>
-          """
-        + day_calendar()
-        + "</div>"
-    )
+@app.get("/api/health")
+def health():
+    """Cheap readiness probe — also tells the UI whether a key is configured."""
+    return {"ok": True, "key_configured": api_key_configured()}
 
-    if not api_key_configured():
-        st.warning(
-            "**Setup needed:** no Anthropic API key detected. Add "
-            "`ANTHROPIC_API_KEY` to your `.env` file locally, or to your app "
-            "secrets on Streamlit Cloud. The interface works without it, but "
-            "the AI tools will not generate results."
+
+# --------------------------------------------------------------------------- #
+# 1. Family intake
+# --------------------------------------------------------------------------- #
+class IntakeRequest(BaseModel):
+    child_name: str = ""
+    age_range: str = "4–6 years"
+    concerns: list = []
+    description: str = ""
+    clinic: str = "Our Clinic"
+
+
+@app.post("/api/intake")
+def intake(req: IntakeRequest):
+    if not req.concerns and not req.description.strip():
+        return fail(
+            "Select at least one area of concern, or describe the challenges.",
+            status=400,
         )
 
-    steps = "".join(
-        '''<div class="step step-{n}">
-             <div class="step-badge"><div class="glyph">{glyph}</div>
-               <div class="num">{n}</div></div>
-             <h3>{title}</h3>
-             <p>{body}</p>
-             <div class="step-cta"><span>{cta}</span>
-               <span class="arr">→</span></div>
-           </div>'''.format(n=n, glyph=glyph, title=title, body=body, cta=cta)
-        for n, glyph, title, body, cta in JOURNEY
+    clinic = req.clinic.strip() or "Our Clinic"
+    user_message = (
+        "Child's first name: {}\n"
+        "Age range: {}\n"
+        "Areas of concern: {}\n"
+        "Clinic name: {}\n\n"
+        "What the family described:\n{}"
+    ).format(
+        req.child_name.strip() or "Not provided",
+        req.age_range,
+        ", ".join(req.concerns) if req.concerns else "Not specified",
+        clinic,
+        req.description.strip() or "No additional description provided.",
     )
 
-    render_html(
-        '''<div class="journey-wrap">
-             <div class="journey-head">
-               <div>
-                 <div class="eyebrow">The care journey · today</div>
-                 <h2>Pick up where you<br>left off.</h2>
-               </div>
-               <p>Each stop mirrors a real moment in a family's care. Start
-               anywhere — open any tool from the navigation above.</p>
-             </div>
-             <div class="route">''' + steps + "</div></div>"
+    try:
+        raw = call_claude(
+            prompts.INTAKE_SYSTEM.replace("[CLINIC_NAME]", clinic),
+            user_message,
+            max_tokens=2000,
+        )
+    except ClaudeError as exc:
+        return fail(str(exc))
+
+    parsed = parse_sections(raw)
+    secondary = parsed.get("SECONDARY_THERAPY", "")
+    return {
+        "primary": parsed.get("PRIMARY_THERAPY", ""),
+        "secondary": secondary if has_secondary(secondary) else "",
+        "explanation": parsed.get("EXPLANATION", ""),
+        "involves": bullets(parsed.get("WHAT_IT_INVOLVES", "")),
+        "first_appointment": parsed.get("FIRST_APPOINTMENT", ""),
+        "checklist": numbered_items(parsed.get("CHECKLIST", "")),
+        "email": parsed.get("WELCOME_EMAIL", "").strip(),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# 2. Waitlist communications
+# --------------------------------------------------------------------------- #
+class Family(BaseModel):
+    child: str
+    parent: str = ""
+    weeks: int = 4
+    therapy: str = "Speech"
+
+
+class WaitlistRequest(BaseModel):
+    families: list
+    email_type: str = "General status update (we haven't forgotten you)"
+    tone: str = "Warm and reassuring"
+    clinic: str = "Oaklin Lane"
+
+
+@app.post("/api/waitlist")
+def waitlist(req: WaitlistRequest):
+    valid = [f for f in req.families if str(f.get("child", "")).strip()]
+    if not valid:
+        return fail("Add at least one family with a child's first name.", 400)
+    if len(valid) > 10:
+        return fail("Up to 10 families per batch.", 400)
+
+    emails = []
+    for family in valid:
+        system_prompt = prompts.WAITLIST_TEMPLATE.format(
+            clinic=req.clinic.strip() or "our clinic",
+            child=str(family.get("child", "")).strip(),
+            weeks=int(family.get("weeks", 4)),
+            therapy=family.get("therapy", "Speech"),
+            email_type=req.email_type,
+            tone=req.tone,
+            parent=str(family.get("parent", "")).strip() or "Family",
+        )
+        try:
+            body = call_claude(
+                system_prompt, "Write the email now.", max_tokens=700
+            )
+            error = ""
+        except ClaudeError as exc:
+            body, error = "", str(exc)
+
+        emails.append(
+            {
+                "child": str(family.get("child", "")).strip(),
+                "therapy": family.get("therapy", "Speech"),
+                "weeks": int(family.get("weeks", 4)),
+                "email": body,
+                "error": error,
+                "words": len(body.split()),
+            }
+        )
+
+    return {"emails": emails}
+
+
+# --------------------------------------------------------------------------- #
+# 3. Staff assistant
+# --------------------------------------------------------------------------- #
+class AskRequest(BaseModel):
+    messages: list
+
+
+@app.post("/api/ask")
+def ask(req: AskRequest):
+    history = [
+        {"role": m.get("role", "user"), "content": str(m.get("content", ""))}
+        for m in req.messages
+        if str(m.get("content", "")).strip()
+    ]
+    if not history:
+        return fail("Ask a question first.", 400)
+
+    try:
+        answer = call_claude_messages(
+            prompts.ASSISTANT_SYSTEM, history, max_tokens=1200
+        )
+    except ClaudeError as exc:
+        return fail(str(exc))
+
+    return {"answer": answer}
+
+
+# --------------------------------------------------------------------------- #
+# 4. Operations report
+# --------------------------------------------------------------------------- #
+class ReportRequest(BaseModel):
+    clinic: str = "Oaklin Lane"
+    period: str = ""
+    completed: int = 0
+    canceled: int = 0
+    evals: int = 0
+    referrals: int = 0
+    waitlist: int = 0
+    auth_approved: int = 0
+    auth_pending: int = 0
+    auth_denied: int = 0
+    therapists: int = 0
+    utilization: int = 0
+    notes: str = ""
+    compare: bool = False
+    prev_completed: int = 0
+    prev_waitlist: int = 0
+    prev_referrals: int = 0
+    reframe: bool = False
+
+
+@app.post("/api/report")
+def report(req: ReportRequest):
+    if req.completed == 0 and req.canceled == 0:
+        return fail(
+            "Enter at least the completed and canceled appointment counts.", 400
+        )
+
+    scheduled = req.completed + req.canceled
+    lines = [
+        "Clinic name: {}".format(req.clinic or "Our Clinic"),
+        "Report period: {}".format(req.period or "This period"),
+        "",
+        "Total appointments completed: {}".format(req.completed),
+        "Appointments canceled or no-show: {}".format(req.canceled),
+        "Total appointments scheduled (completed + canceled): {}".format(scheduled),
+        "New patient evaluations: {}".format(req.evals),
+        "New referrals received: {}".format(req.referrals),
+        "Current waitlist size: {}".format(req.waitlist),
+        "Insurance authorizations approved: {}".format(req.auth_approved),
+        "Insurance authorizations pending: {}".format(req.auth_pending),
+        "Insurance authorizations denied: {}".format(req.auth_denied),
+        "Active therapists this period: {}".format(req.therapists),
+        "Available therapy hours used: {}%".format(req.utilization),
+    ]
+    if req.compare:
+        lines += [
+            "",
+            "PRIOR PERIOD COMPARISON:",
+            "Previous appointments completed: {}".format(req.prev_completed),
+            "Previous waitlist size: {}".format(req.prev_waitlist),
+            "Previous new referrals: {}".format(req.prev_referrals),
+        ]
+    lines += [
+        "",
+        "Notes, highlights or concerns from the team:",
+        req.notes.strip() or "None provided.",
+        "",
+        "Today's date: {}".format(date.today().strftime("%B %d, %Y")),
+    ]
+    payload = "\n".join(lines)
+
+    system = prompts.REPORT_SYSTEM + (
+        prompts.REPORT_REFRAME if req.reframe else ""
     )
+    try:
+        markdown = call_claude(system, payload, max_tokens=2500)
+    except ClaudeError as exc:
+        return fail(str(exc))
 
-    items = "".join(
-        '''<div class="ticker-item i-{n}"><div class="n">{num}</div>
-             <div class="l">{label}</div></div>'''.format(n=n, num=num, label=label)
-        for n, num, label in TICKER
-    )
-
-    render_html(
-        '''<div class="ticker">
-             <div class="ticker-l">
-               <div class="eyebrow">This week at Oaklin Lane</div>
-               <h3>A steady week, but<br>the auth backlog is <em>aging</em>.</h3>
-             </div>
-             <div class="ticker-r">''' + items + "</div></div>"
-    )
-
-    st.write("")
-    st.caption(
-        "Figures shown are the sample dataset the Report tool ships with. "
-        "TherapyNavigator is a demonstration project — it does not diagnose, "
-        "store patient data, or replace clinical judgment."
-    )
-
-
-navigation = st.navigation(
-    [
-        # The canvas uses typographic glyphs (✦ ✚ ✉ ☾ ◈); st.Page only accepts
-        # emoji or Material icon names, so these are the closest equivalents.
-        st.Page(home, title="Today", icon=":material/wb_sunny:", default=True),
-        st.Page(
-            "views/1_Family_Intake.py", title="Intake", icon=":material/add:"
-        ),
-        st.Page(
-            "views/2_Waitlist_Comms.py", title="Waitlist", icon=":material/mail:"
-        ),
-        st.Page(
-            "views/3_Staff_Assistant.py",
-            title="Assistant",
-            icon=":material/chat_bubble:",
-        ),
-        st.Page(
-            "views/4_Operations_Report.py",
-            title="Report",
-            icon=":material/insights:",
-        ),
-    ],
-    position="top",
-)
-
-navigation.run()
+    cancel_rate = (100 * req.canceled / scheduled) if scheduled else 0
+    decided = req.auth_approved + req.auth_denied
+    return {
+        "report": markdown,
+        "payload": payload,
+        "metrics": {
+            "scheduled": scheduled,
+            "completion_rate": round(100 * req.completed / scheduled, 1)
+            if scheduled
+            else 0,
+            "cancel_rate": round(cancel_rate, 1),
+            "denial_rate": round(100 * req.auth_denied / decided, 1)
+            if decided
+            else 0,
+        },
+    }

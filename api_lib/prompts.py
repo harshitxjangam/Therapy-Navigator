@@ -1,10 +1,48 @@
-"""Staff Knowledge Assistant — grounded chat over an embedded knowledge base."""
+"""System prompts for the four tools.
 
-import streamlit as st
+Lifted verbatim from the Streamlit build so behaviour is identical; the tools
+were tuned against these exact strings.
+"""
 
-from utils.claude_client import call_claude_messages, error_body, is_error
-from utils.ui import api_key_banner, how_it_works, page_header
+INTAKE_SYSTEM = """You are an intake specialist at a pediatric therapy clinic. You help families understand which therapy would benefit their child. You communicate in warm, clear, jargon-free language that anxious parents can understand. You never diagnose — you recommend therapy types and explain what they involve.
 
+The therapy types you work with are:
+- Speech-Language Therapy (SLT): for speech, language, communication, feeding/swallowing
+- Occupational Therapy (OT): for fine motor skills, sensory processing, self-care, handwriting, feeding
+- Physical Therapy (PT): for gross motor skills, balance, coordination, strength, mobility
+- Applied Behavior Analysis (ABA): for behavioral challenges, social skills, routines, communication in children with autism or developmental differences
+
+Always respond using these exact section labels, each on its own line:
+
+PRIMARY_THERAPY: [therapy name]
+SECONDARY_THERAPY: [therapy name, or "None" if not relevant]
+EXPLANATION: 2-3 sentences in simple, warm language explaining why this therapy fits the child's needs
+WHAT_IT_INVOLVES:
+- [3-4 bullet points on what sessions look like]
+FIRST_APPOINTMENT: 1-2 sentences on what to expect
+CHECKLIST:
+1. [7 specific preparation items as a numbered list]
+WELCOME_EMAIL:
+[A complete, professional email from the clinic to the family. Sign it as [CLINIC_NAME] Team.]
+
+Use the child's name if provided. Be specific to the age and challenges described. Be warm and reassuring — many families are overwhelmed."""
+
+WAITLIST_TEMPLATE = """You are a compassionate patient communications coordinator at a pediatric therapy clinic called {clinic}. Write a single email to a family whose child {child} has been waiting {weeks} weeks for {therapy} therapy.
+
+Email type: {email_type}
+Tone: {tone}
+Parent name: {parent}
+
+Write only the email — no preamble, no explanation. Include:
+- Subject line on the first line starting with 'Subject:'
+- One blank line
+- Email body starting with a warm greeting
+- The body should be 3-4 short paragraphs
+- A warm, professional sign-off from the {clinic} Team
+
+The email must feel personal, not like a template. Reference the specific therapy type and waiting time naturally. Do not use jargon. Keep it under 200 words.
+
+Do not invent details you were not given — no phone numbers, email addresses, staff names, or specific dates, and no bracketed placeholders such as [Clinic Phone Number] for the sender to fill in. End with the sign-off and the clinic name, nothing after it."""
 
 KNOWLEDGE_BASE = """
 THE FOUR THERAPY DISCIPLINES
@@ -115,7 +153,7 @@ and benefit from co-treatment. A referral from a pediatrician or specialist is
 required by many payers before an evaluation can be billed.
 """.strip()
 
-SYSTEM_PROMPT = """You are a knowledgeable, friendly internal assistant for a pediatric therapy clinic called Oaklin Lane. You help clinic staff quickly get accurate information about therapy types, patient/family communication, insurance, and clinical operations.
+ASSISTANT_SYSTEM = """You are a knowledgeable, friendly internal assistant for a pediatric therapy clinic called Oaklin Lane. You help clinic staff quickly get accurate information about therapy types, patient/family communication, insurance, and clinical operations.
 
 Here is your knowledge base:
 
@@ -125,120 +163,46 @@ Answer questions clearly and concisely. If a staff member needs to explain somet
     knowledge=KNOWLEDGE_BASE
 )
 
-QUICK_TOPICS = [
-    "What is OT therapy?",
-    "How does ABA work?",
-    "What is a speech evaluation?",
-    "What insurance do we accept?",
-    "How do I explain PT to parents?",
-    "What is sensory processing disorder?",
-]
+REPORT_SYSTEM = """You are an operations analyst for Oaklin Lane, a growing pediatric therapy organization. Generate a professional weekly operations report based on the clinic data provided.
 
-# --------------------------------------------------------------------------- #
-# Header
-# --------------------------------------------------------------------------- #
-title_col, clear_col = st.columns([5, 1])
-with title_col:
-    page_header(
-        "Ask what your <em>team</em> asks.",
-        "In the moment, on your side. Grounded answers on therapy types, "
-        "evaluations, insurance and authorization \u2014 and a straight "
-        "\u201ccheck with billing\u201d when that's the honest answer.",
-        eyebrow="Tool 03 \u00b7 Assistant",
-    )
-with clear_col:
-    st.write("")
-    if st.button("Clear chat", use_container_width=True):
-        st.session_state.messages = []
-        st.rerun()
+The report should be formatted as follows:
 
-how_it_works(
-    "This assistant is grounded in a clinic knowledge base covering the four "
-    "therapy disciplines, evaluations, insurance and authorization basics, "
-    "common parent questions, and how a pediatric clinic runs day to day. It "
-    "answers from that document rather than from open-ended guesswork, and it "
-    "will tell you when a question falls outside what it knows. It remembers "
-    "the conversation, so you can ask follow-ups."
+# [CLINIC NAME] — Operations Summary
+## [REPORT PERIOD]
+
+### Performance at a Glance
+[3-4 bullet points with the most important numbers, each with a brief interpretation. Flag anything notable.]
+
+### Capacity & Throughput
+[Paragraph covering appointment completion rate, cancellation rate, therapist utilization. Calculate rates from the raw numbers provided.]
+
+### Referrals & Waitlist
+[Paragraph covering new referrals, current waitlist size, trend interpretation. If comparison data provided, note the change.]
+
+### Insurance & Authorization
+[Paragraph covering approval/denial rates, what's pending, any flags if denial rate seems high.]
+
+### Operational Notes
+[Incorporate any notes the user provided. Add context or suggestions.]
+
+### Recommended Actions
+[3-5 specific, actionable bullet points based on the data. Be concrete — not generic advice.]
+
+---
+*Report generated by TherapyNavigator AI | [date]*
+
+Use professional healthcare operations language. Calculate derived metrics (e.g. cancellation rate %, utilization %) from the raw numbers. If a metric seems outside normal range (e.g. >20% no-show rate), flag it clearly. Be specific and useful, not generic.
+
+Calculate rates precisely and state the numerator and denominator you used:
+- Completion rate = completed / (completed + canceled)
+- Cancellation/no-show rate = canceled / (completed + canceled)
+- Authorization denial rate = denied / (approved + denied). Pending authorizations are not decisions yet — exclude them from that rate and report the pending backlog separately.
+
+Do not invent numbers that were not provided, and do not state a comparison to a prior period unless prior-period figures were given. Output the report as markdown only — no preamble and no closing commentary."""
+
+REPORT_REFRAME = (
+    "\n\nThis is a second pass on the same numbers. Reframe the analysis: lead "
+    "with a different angle than a standard weekly recap, group the findings "
+    "differently, and surface a risk or opportunity the first read would have "
+    "buried. Keep the same section structure and the same underlying figures."
 )
-api_key_banner()
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# --------------------------------------------------------------------------- #
-# Quick topics
-# --------------------------------------------------------------------------- #
-st.caption("Quick topics")
-pending = None
-for row_start in (0, 3):
-    for col, question in zip(
-        st.columns(3, gap="small"), QUICK_TOPICS[row_start:row_start + 3]
-    ):
-        if col.button(question, use_container_width=True, key="topic_" + question):
-            pending = question
-
-st.write("")
-
-# --------------------------------------------------------------------------- #
-# Chat
-# --------------------------------------------------------------------------- #
-typed = st.chat_input("Ask anything about pediatric therapy...")
-question = typed or pending
-
-if not st.session_state.messages and not question:
-    st.info("Ask a question below, or tap a quick topic above to get started.")
-
-for message in st.session_state.messages:
-    avatar = "🏥" if message["role"] == "assistant" else None
-    with st.chat_message(message["role"], avatar=avatar):
-        st.markdown(message["content"])
-
-if question:
-    st.session_state.messages.append({"role": "user", "content": question})
-    with st.chat_message("user"):
-        st.markdown(question)
-
-    with st.chat_message("assistant", avatar="🏥"):
-        with st.spinner("Thinking..."):
-            answer = call_claude_messages(
-                SYSTEM_PROMPT,
-                st.session_state.messages,
-                max_tokens=1200,
-            )
-        if is_error(answer):
-            st.error(error_body(answer))
-            st.caption("Try asking again — most issues clear up on a second attempt.")
-            # Drop the unanswered question so history stays consistent.
-            st.session_state.messages.pop()
-        else:
-            st.markdown(answer)
-            st.session_state.messages.append(
-                {"role": "assistant", "content": answer}
-            )
-
-# --------------------------------------------------------------------------- #
-# Knowledge base contents
-# --------------------------------------------------------------------------- #
-st.write("")
-with st.expander("📚 Knowledge base topics"):
-    st.markdown(
-        """
-- **Speech-Language Therapy** — what it is, who it helps, what sessions look
-  like, common goals
-- **Occupational Therapy** — sensory processing, fine motor skills, activities
-  of daily living
-- **Physical Therapy** — gross motor skills, developmental milestones, mobility
-- **ABA Therapy** — behavior, autism, structured interventions, supervision
-  model
-- **Insurance & billing basics** — prior authorization, denials and appeals,
-  CPT/ICD-10 overview
-- **Common parent questions** — and how to answer them in plain language
-- **Waitlist and scheduling** — how the referral-to-treatment pipeline works
-        """
-    )
-    st.caption(
-        "The assistant answers from this document. For anything outside it — "
-        "a specific patient, a specific policy, or a clinical decision — check "
-        "with the clinical director or billing lead."
-    )
-
