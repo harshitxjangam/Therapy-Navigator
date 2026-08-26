@@ -274,5 +274,11 @@ def report(req: ReportRequest):
 # routes all traffic to this app, so serving the frontend here is what makes
 # "/" work — relying on platform-level static handling would 404.
 # --------------------------------------------------------------------------- #
+# On Vercel, public/ is uploaded as CDN static assets and excluded from the
+# function bundle, so the directory does not exist at runtime — mounting it
+# unconditionally raises during import and fails every request, including
+# /api/*. The platform already serves those files, so mount only when the
+# directory is actually present (local development).
 _PUBLIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
-app.mount("/", StaticFiles(directory=_PUBLIC, html=True), name="static")
+if os.path.isdir(_PUBLIC):
+    app.mount("/", StaticFiles(directory=_PUBLIC, html=True), name="static")
