@@ -141,8 +141,11 @@ if "waitlist_emails" not in st.session_state:
 # Header
 # --------------------------------------------------------------------------- #
 page_header(
-    "📬 Waitlist Communication Engine",
-    "Generate personalized updates for every waiting family",
+    "Nobody waits in <em>silence</em>.",
+    "Enter the families who are waiting. Every one gets their own email \u2014 "
+    "their child's name, their therapy, their actual wait \u2014 written to be "
+    "read, not filed.",
+    eyebrow="Tool 02 \u00b7 Waitlist",
 )
 
 how_it_works(

@@ -115,8 +115,11 @@ if "ops_payload" not in st.session_state:
 # Header
 # --------------------------------------------------------------------------- #
 page_header(
-    "📊 Operations Report Generator",
-    "Turn raw numbers into a leadership-ready summary",
+    "A week, read <em>properly</em>.",
+    "Paste the raw numbers. Get completion and cancellation rates, therapist "
+    "utilization, authorization outcomes, anything outside normal flagged, and "
+    "the actions worth taking.",
+    eyebrow="Tool 04 \u00b7 Report",
 )
 
 how_it_works(

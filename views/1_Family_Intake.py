@@ -75,8 +75,11 @@ SAMPLE = {
 # Header
 # --------------------------------------------------------------------------- #
 page_header(
-    "🧒 Family Intake AI",
-    "Help families find the right therapy for their child",
+    "Let's find the right <em>fit</em>.",
+    "Describe what you're noticing. We'll recommend a therapy discipline in "
+    "plain language, build a checklist for the first visit, and draft a "
+    "welcome email. No diagnoses \u2014 just a warm next step.",
+    eyebrow="Tool 01 \u00b7 Intake",
 )
 
 how_it_works(

@@ -1,110 +1,100 @@
 """TherapyNavigator — AI operations tools for pediatric therapy organizations.
 
-Entry point. Owns page config, shared chrome, and the sidebar navigation; the
-four tools live in pages/ and are wired up through st.navigation below.
+Entry point. Owns page config, shared chrome, and the top navigation; the four
+tools live in views/ and are wired up through st.navigation below.
 """
 
 import streamlit as st
 
 from utils.claude_client import api_key_configured
-from utils.ui import page_chrome, sidebar_footer
+from utils.ui import LOGO_PATH, page_chrome
 
 st.set_page_config(
     page_title="TherapyNavigator",
     page_icon="🏥",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
+st.logo(LOGO_PATH, size="medium")
 page_chrome()
 
 TOOLS = [
     (
-        "🧒",
-        "Family Intake AI",
-        "Recommend the right therapy for a child and generate a personalized "
-        "family welcome email — in seconds.",
-        "/Family_Intake",
+        "01",
+        "✚",
+        "Family Intake",
+        "Describe what you're noticing. Get a therapy recommendation in plain "
+        "language, a prep checklist, and a drafted welcome email.",
     ),
     (
-        "📬",
-        "Waitlist Communication Engine",
-        "Auto-generate warm, personalized status update emails for every "
-        "family on your waitlist.",
-        "/Waitlist_Comms",
+        "02",
+        "✉",
+        "Waitlist Comms",
+        "Nobody waits in silence. Personal status emails for every waiting "
+        "family, written one at a time, ready to review and send.",
     ),
     (
-        "💬",
-        "Staff Knowledge Assistant",
-        "Instantly answer staff questions about therapy types, insurance, "
-        "billing, and operations.",
-        "/Staff_Assistant",
+        "03",
+        "☾",
+        "Staff Assistant",
+        "Ask what your team asks. Grounded answers on therapy types, "
+        "evaluations, insurance and authorization — in the moment.",
     ),
     (
-        "📊",
-        "Operations Report Generator",
-        "Paste raw clinic numbers and get a formatted weekly operations "
-        "summary with trends and action items.",
-        "/Operations_Report",
+        "04",
+        "◈",
+        "Weekly Report",
+        "Raw clinic numbers become a leadership-ready summary, with rates "
+        "calculated, outliers flagged, and actions named.",
     ),
 ]
 
-JOURNEY = """
-<a class="journey-link" href="{path}" target="_self">
-<div class="journey-step journey-{number}">
-    <div class="journey-index">0{number}</div>
-    <div class="journey-icon">{icon}</div>
-    <div class="journey-copy"><span>AI WORKSPACE</span><h3>{title}</h3><p>{body}</p></div>
-    <div class="journey-action">Explore <b>→</b></div>
+CARD = """
+<div class="card">
+  <div class="card-top">
+    <div class="card-icon">{icon}</div>
+    <div class="card-num">TOOL {num}</div>
+  </div>
+  <div class="card-title">{title}</div>
+  <div class="card-body">{body}</div>
+  <div class="card-link">Open tool →</div>
 </div>
-</a>
 """
 
-VALUES = [
+PRINCIPLES = [
     (
-        "Saves 10+ hours/week",
-        "Automates the most repetitive admin tasks — intake summaries, "
-        "waitlist follow-ups, and weekly reporting.",
+        "✦",
+        "Saves 10+ hours a week",
+        "The repetitive middle of the job — intake summaries, waitlist "
+        "follow-ups, weekly reporting — handled in a few minutes.",
     ),
     (
-        "Family-first design",
-        "Every tool puts the family experience first, with warm, jargon-free "
-        "language that anxious parents can actually understand.",
+        "♥",
+        "Family-first language",
+        "Warm and jargon-free by default, because most families meet these "
+        "words on the hardest week of their year.",
     ),
     (
+        "↯",
         "Built to scale",
-        "Designed for multi-clinic organizations, so adding a location does "
-        "not mean adding another coordinator.",
+        "Designed for multi-clinic organizations, so opening a location "
+        "doesn't mean hiring another coordinator.",
     ),
 ]
 
 
 def home():
-    """Landing page: hero, tool cards, value props."""
+    """Landing page: hero, tool cards, principles."""
     st.markdown(
         """
-        <div class="hero hero-home immersive-hero">
-            <div class="hero-grid"></div>
-            <div class="hero-copy">
-                <div class="hero-chip"><i></i> THE THERAPYNAVIGATOR SYSTEM</div>
-                <h1>Care, in<br><em>motion.</em></h1>
-                <p>One considered workspace for the many small moments that
-                make a pediatric therapy clinic feel extraordinary.</p>
-                <div class="hero-note"><b>✦</b> Designed to make the everyday feel lighter</div>
-            </div>
-            <div class="hero-visual" aria-hidden="true">
-                <div class="orbital-shadow"></div>
-                <div class="care-orb"><div class="orb-glow"></div><div class="orb-mark">✦</div></div>
-                <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-                <div class="floating-note note-intake"><i>↗</i><b>Family intake</b><small>Thoughtful from hello</small></div>
-                <div class="floating-note note-team"><i>✦</i><b>Team clarity</b><small>Answers in the moment</small></div>
-                <div class="floating-note note-growth"><i>⌁</i><b>Care continues</b><small>Every follow-up counts</small></div>
-                <div class="orbital-dot dot-a"></div><div class="orbital-dot dot-b"></div>
-                <div class="tiny-caption">CARE, CONNECTED</div>
-            </div>
-        </div>
-        <div class="hero-footer">
-            <span>FAMILY-FIRST OPERATIONS</span><i></i><span>WARMER COMMUNICATION</span><i></i><span>SMARTER WORKFLOWS</span>
+        <div class="hero">
+          <div class="hero-eyebrow"><span class="dot"></span>
+            Four tools · one calm place</div>
+          <h1>Care, in <em>motion.</em></h1>
+          <p>Everything the clinic asks of you — intake, outreach, answers and
+          reporting — in one considered workspace built for the small moments
+          that make a pediatric therapy practice feel extraordinary.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -118,45 +108,68 @@ def home():
             "the AI tools will not generate results."
         )
 
-    st.markdown(
-        """<div class="journey-intro"><div class="eyebrow">THE CARE JOURNEY</div>
-        <h2>Built around the rhythm<br>of a real clinic.</h2><p>Each workspace
-        removes a little friction from the path between a family’s first question
-        and their next confident step.</p></div>""",
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="eyebrow">The toolkit</div>', unsafe_allow_html=True)
+    st.write("")
 
-    for number, (icon, title, body, path) in enumerate(TOOLS, start=1):
-        st.markdown(
-            JOURNEY.format(
-                number=number, icon=icon, title=title, body=body, path=path
-            ),
-            unsafe_allow_html=True,
-        )
+    for row_start in (0, 2):
+        for col, (num, icon, title, body) in zip(
+            st.columns(2, gap="medium"), TOOLS[row_start:row_start + 2]
+        ):
+            with col:
+                st.markdown(
+                    CARD.format(num=num, icon=icon, title=title, body=body),
+                    unsafe_allow_html=True,
+                )
+        st.write("")
+
+    st.caption("Open any tool from the navigation above.")
+    st.write("")
 
     st.markdown(
-        """<div class="statement-band"><div class="statement-orb">✦</div>
-        <div><span>THE DIFFERENCE IS IN THE DETAILS</span><h2>More time with the
-        people who matter. Less time lost to everything else.</h2></div></div>""",
-        unsafe_allow_html=True,
+        '<div class="eyebrow">Why TherapyNavigator</div>', unsafe_allow_html=True
     )
-    st.markdown(
-        '<div class="home-disclaimer">TherapyNavigator supports your team—it does not '
-        'diagnose, store patient data, or replace clinical judgment.</div>',
-        unsafe_allow_html=True,
+    st.write("")
+
+    for col, (glyph, heading, body) in zip(st.columns(3, gap="medium"), PRINCIPLES):
+        with col:
+            st.markdown(
+                '<div class="card"><div class="card-icon">{}</div>'
+                '<div class="card-title">{}</div>'
+                '<div class="card-body">{}</div></div>'.format(glyph, heading, body),
+                unsafe_allow_html=True,
+            )
+
+    st.write("")
+    st.write("")
+    st.caption(
+        "TherapyNavigator is a demonstration project. It does not diagnose, "
+        "store patient data, or replace clinical judgment."
     )
 
 
 navigation = st.navigation(
     [
-        st.Page(home, title="Home", icon="🏠", default=True),
-        st.Page("views/1_Family_Intake.py", title="Family Intake", icon="🧒"),
-        st.Page("views/2_Waitlist_Comms.py", title="Waitlist Comms", icon="📬"),
-        st.Page("views/3_Staff_Assistant.py", title="Staff Assistant", icon="💬"),
-        st.Page("views/4_Operations_Report.py", title="Operations Report", icon="📊"),
-    ]
+        # The canvas uses typographic glyphs (✦ ✚ ✉ ☾ ◈); st.Page only accepts
+        # emoji or Material icon names, so these are the closest equivalents.
+        st.Page(home, title="Today", icon=":material/wb_sunny:", default=True),
+        st.Page(
+            "views/1_Family_Intake.py", title="Intake", icon=":material/add:"
+        ),
+        st.Page(
+            "views/2_Waitlist_Comms.py", title="Waitlist", icon=":material/mail:"
+        ),
+        st.Page(
+            "views/3_Staff_Assistant.py",
+            title="Assistant",
+            icon=":material/chat_bubble:",
+        ),
+        st.Page(
+            "views/4_Operations_Report.py",
+            title="Report",
+            icon=":material/insights:",
+        ),
+    ],
+    position="top",
 )
 
 navigation.run()
-
-sidebar_footer()

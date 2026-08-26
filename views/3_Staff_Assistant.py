@@ -140,8 +140,11 @@ QUICK_TOPICS = [
 title_col, clear_col = st.columns([5, 1])
 with title_col:
     page_header(
-        "💬 Staff Knowledge Assistant",
-        "Instant answers for your team — available 24/7",
+        "Ask what your <em>team</em> asks.",
+        "In the moment, on your side. Grounded answers on therapy types, "
+        "evaluations, insurance and authorization \u2014 and a straight "
+        "\u201ccheck with billing\u201d when that's the honest answer.",
+        eyebrow="Tool 03 \u00b7 Assistant",
     )
 with clear_col:
     st.write("")
