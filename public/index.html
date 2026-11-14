@@ -443,11 +443,11 @@ a:hover{opacity:.7}
   <div class="brand"><span class="plus">+</span>Therapy<em>Navigator</em></div>
   <div class="tabs" ref="{{ setTabsRef }}">
     <div class="tab-pill" style="{{ pillStyle }}"></div>
-    <button class="tab {{ tabClass0 }}" data-dc-click="{{ go0 }}"><span class="ico">✦</span> Today</button>
-    <button class="tab {{ tabClass1 }}" data-dc-click="{{ go1 }}"><span class="ico">✚</span> Intake</button>
-    <button class="tab {{ tabClass2 }}" data-dc-click="{{ go2 }}"><span class="ico">✉</span> Waitlist</button>
-    <button class="tab {{ tabClass3 }}" data-dc-click="{{ go3 }}"><span class="ico">☾</span> Assistant</button>
-    <button class="tab {{ tabClass4 }}" data-dc-click="{{ go4 }}"><span class="ico">◈</span> Report</button>
+    <button class="tab {{ tabClass0 }}" data-action="go0"><span class="ico">✦</span> Today</button>
+    <button class="tab {{ tabClass1 }}" data-action="go1"><span class="ico">✚</span> Intake</button>
+    <button class="tab {{ tabClass2 }}" data-action="go2"><span class="ico">✉</span> Waitlist</button>
+    <button class="tab {{ tabClass3 }}" data-action="go3"><span class="ico">☾</span> Assistant</button>
+    <button class="tab {{ tabClass4 }}" data-action="go4"><span class="ico">◈</span> Report</button>
   </div>
   <div class="nav-cta">
     <button class="nav-btn">Get Started</button>
@@ -464,7 +464,7 @@ a:hover{opacity:.7}
       <h1 class="serif">Care, in <em class="italic">motion.</em></h1>
       <p>Good morning, Maya. Three families are ready for outreach, one intake is waiting on your read-through, and the weekly report is due Friday. Everything the clinic asked of you, in one calm place.</p>
       <div class="hero-actions">
-        <button class="btn-primary" data-dc-click="{{ go1 }}">Start a new intake <span class="arrow">→</span></button>
+        <button class="btn-primary" data-action="go1">Start a new intake <span class="arrow">→</span></button>
         <button class="btn-ghost">Watch 60-sec tour</button>
       </div>
       <div class="hero-stats">
@@ -546,25 +546,25 @@ a:hover{opacity:.7}
       <p>Each stop mirrors a real moment in a family's care. Start anywhere. The app keeps context.</p>
     </div>
     <div class="route">
-      <div class="step step-1" data-dc-click="{{ go1 }}">
+      <div class="step step-1" data-action="go1">
         <div class="step-badge"><div class="glyph">✚</div><div class="num">1</div></div>
         <h3>Family Intake</h3>
         <p>Match a child to the right therapy in plain, warm language. Then send a welcome email.</p>
         <div class="step-cta"><span>1 DRAFT WAITING</span><span class="arr">→</span></div>
       </div>
-      <div class="step step-2" data-dc-click="{{ go2 }}">
+      <div class="step step-2" data-action="go2">
         <div class="step-badge"><div class="glyph">✉</div><div class="num">2</div></div>
         <h3>Waitlist Comms</h3>
         <p>Personalized status emails for everyone waiting. Nobody goes silent.</p>
         <div class="step-cta"><span>4 READY TO SEND</span><span class="arr">→</span></div>
       </div>
-      <div class="step step-3" data-dc-click="{{ go3 }}">
+      <div class="step step-3" data-action="go3">
         <div class="step-badge"><div class="glyph">☾</div><div class="num">3</div></div>
         <h3>Staff Assistant</h3>
         <p>A grounded chat over your clinic knowledge base. Evaluations, insurance, phrasing.</p>
         <div class="step-cta"><span>GROUNDED</span><span class="arr">→</span></div>
       </div>
-      <div class="step step-4" data-dc-click="{{ go4 }}">
+      <div class="step step-4" data-action="go4">
         <div class="step-badge"><div class="glyph">◈</div><div class="num">4</div></div>
         <h3>Weekly Report</h3>
         <p>Raw clinic numbers become a leadership-ready summary with recommended actions.</p>
@@ -595,8 +595,8 @@ a:hover{opacity:.7}
       <p>Describe what you're noticing. We'll recommend a therapy discipline in plain language and draft a welcome email. No diagnoses, just a warm next step.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn" data-dc-click="{{ loadIntakeSample }}">↻ Load sample</button>
-      <button class="tool-btn solid" data-dc-click="{{ clearIntake }}">Clear form</button>
+      <button class="tool-btn" data-action="loadIntakeSample">↻ Load sample</button>
+      <button class="tool-btn solid" data-action="clearIntake">Clear form</button>
     </div>
   </div>
 
@@ -610,16 +610,16 @@ a:hover{opacity:.7}
       </div>
       <div class="field"><label>Areas of concern <span style="color:var(--ink-2);font-weight:400">· tap all that apply</span></label></div>
       <div class="chips">
-        <span class="chip {{ concernSpeechClass }}" data-dc-click="{{ toggleSpeech }}"><span class="g">✚</span> Speech &amp; language</span>
-        <span class="chip {{ concernFineClass }}" data-dc-click="{{ toggleFine }}"><span class="g">✎</span> Fine motor</span>
-        <span class="chip {{ concernSensoryClass }}" data-dc-click="{{ toggleSensory }}"><span class="g">☾</span> Sensory sensitivities</span>
-        <span class="chip {{ concernGrossClass }}" data-dc-click="{{ toggleGross }}"><span class="g">↯</span> Gross motor</span>
-        <span class="chip {{ concernSocialClass }}" data-dc-click="{{ toggleSocial }}"><span class="g">♥</span> Social &amp; play</span>
-        <span class="chip {{ concernFeedingClass }}" data-dc-click="{{ toggleFeeding }}"><span class="g">◐</span> Feeding</span>
-        <span class="chip {{ concernAttentionClass }}" data-dc-click="{{ toggleAttention }}"><span class="g">✦</span> Attention</span>
+        <span class="chip {{ concernSpeechClass }}" data-action="toggleSpeech"><span class="g">✚</span> Speech &amp; language</span>
+        <span class="chip {{ concernFineClass }}" data-action="toggleFine"><span class="g">✎</span> Fine motor</span>
+        <span class="chip {{ concernSensoryClass }}" data-action="toggleSensory"><span class="g">☾</span> Sensory sensitivities</span>
+        <span class="chip {{ concernGrossClass }}" data-action="toggleGross"><span class="g">↯</span> Gross motor</span>
+        <span class="chip {{ concernSocialClass }}" data-action="toggleSocial"><span class="g">♥</span> Social &amp; play</span>
+        <span class="chip {{ concernFeedingClass }}" data-action="toggleFeeding"><span class="g">◐</span> Feeding</span>
+        <span class="chip {{ concernAttentionClass }}" data-action="toggleAttention"><span class="g">✦</span> Attention</span>
       </div>
       <div class="field"><label>In the family's words</label><div class="input multi"><textarea class="canvas-textarea" value="{{ intakeDescription }}" data-dc-input="{{ setIntakeDescription }}" placeholder="Tell us what you've been noticing."></textarea></div></div>
-      <button class="submit-btn" data-dc-click="{{ startMatch }}"><span>{{ submitLabel }} <span style="opacity:.5">· {{ submitMeta }}</span></span><span class="arrow">→</span></button>
+      <button class="submit-btn" data-action="startMatch"><span>{{ submitLabel }} <span style="opacity:.5">· {{ submitMeta }}</span></span><span class="arrow">→</span></button>
       <div class="api-status">{{ intakeError }}</div>
     </div>
 
@@ -695,8 +695,8 @@ a:hover{opacity:.7}
       <p>Four families are ready for a status update. Pick a tone; we'll draft each with their specifics. You review, edit, send.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn" data-dc-click="{{ loadWaitlistSample }}">↻ Load sample</button>
-      <button class="tool-btn solid" data-dc-click="{{ generateWaitlist }}">{{ waitlistTopLabel }}</button>
+      <button class="tool-btn" data-action="loadWaitlistSample">↻ Load sample</button>
+      <button class="tool-btn solid" data-action="generateWaitlist">{{ waitlistTopLabel }}</button>
     </div>
   </div>
 
@@ -706,13 +706,13 @@ a:hover{opacity:.7}
       <div class="setting"><label>Tone</label>
         <div class="seg" ref="{{ setToneRef }}">
           <div class="seg-pill" style="{{ tonePillStyle }}"></div>
-          <span class="{{ tone0cls }}" data-dc-click="{{ setTone0 }}"><span>♥</span> Warm</span>
-          <span class="{{ tone1cls }}" data-dc-click="{{ setTone1 }}"><span>◈</span> Direct</span>
-          <span class="{{ tone2cls }}" data-dc-click="{{ setTone2 }}"><span>⚡</span> Urgent</span>
+          <span class="{{ tone0cls }}" data-action="setTone0"><span>♥</span> Warm</span>
+          <span class="{{ tone1cls }}" data-action="setTone1"><span>◈</span> Direct</span>
+          <span class="{{ tone2cls }}" data-action="setTone2"><span>⚡</span> Urgent</span>
         </div>
       </div>
       <div class="setting"><label>Clinic</label><div class="val">Oak Hill · Austin</div></div>
-      <button class="submit-btn" data-dc-click="{{ generateWaitlist }}" style="width:auto;padding:12px 20px"><span>{{ waitlistLabel }}</span><span class="arrow" style="width:28px;height:28px">→</span></button>
+      <button class="submit-btn" data-action="generateWaitlist" style="width:auto;padding:12px 20px"><span>{{ waitlistLabel }}</span><span class="arrow" style="width:28px;height:28px">→</span></button>
     </div>
     <div class="batch-stats">
       <div class="eyebrow" style="color:var(--yellow);opacity:1">BATCH READY</div>
@@ -763,7 +763,7 @@ a:hover{opacity:.7}
       <div class="email-body email-live">{{ waitlistEmail }}</div>
       <div class="email-actions">
         <div class="stat">148 WORDS · READS IN ~40 SEC</div>
-        <button class="tool-btn" data-dc-click="{{ generateWaitlist }}">↻ Regenerate</button>
+        <button class="tool-btn" data-action="generateWaitlist">↻ Regenerate</button>
         <button class="tool-btn">⤓ Download</button>
         <button class="tool-btn solid">✓ Approve &amp; queue</button>
       </div>
@@ -781,7 +781,7 @@ a:hover{opacity:.7}
       <p>A grounded chat over your clinic's knowledge base. It'll tell you when a question falls outside. It never guesses about specific coverage or clinical decisions.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn" data-dc-click="{{ clearChat }}">↻ Clear chat</button>
+      <button class="tool-btn" data-action="clearChat">↻ Clear chat</button>
       <button class="tool-btn solid">✚ New thread</button>
     </div>
   </div>
@@ -818,11 +818,11 @@ a:hover{opacity:.7}
       <div class="quick-topics">
         <div class="eyebrow">Quick topics</div>
         <div class="qt-chips">
-          <span class="qt" data-dc-click="{{ askOT }}"><span class="g">♥</span> What is OT therapy?</span>
-          <span class="qt" data-dc-click="{{ askABA }}"><span class="g">◈</span> How does ABA work?</span>
-          <span class="qt" data-dc-click="{{ askSpeech }}"><span class="g">☾</span> Explain a speech eval</span>
-          <span class="qt" data-dc-click="{{ askAuth }}"><span class="g">✚</span> Prior auth timing</span>
-          <span class="qt" data-dc-click="{{ askSensory }}"><span class="g">✎</span> Sensory processing?</span>
+          <span class="qt" data-action="askOT"><span class="g">♥</span> What is OT therapy?</span>
+          <span class="qt" data-action="askABA"><span class="g">◈</span> How does ABA work?</span>
+          <span class="qt" data-action="askSpeech"><span class="g">☾</span> Explain a speech eval</span>
+          <span class="qt" data-action="askAuth"><span class="g">✚</span> Prior auth timing</span>
+          <span class="qt" data-action="askSensory"><span class="g">✎</span> Sensory processing?</span>
         </div>
       </div>
 
@@ -846,7 +846,7 @@ a:hover{opacity:.7}
 
       <div class="chat-input">
         <input class="canvas-input" value="{{ chatDraft }}" data-dc-input="{{ setChatDraft }}" placeholder="Ask anything about pediatric therapy…">
-        <button class="send" data-dc-click="{{ sendChat }}">→</button>
+        <button class="send" data-action="sendChat">→</button>
       </div>
       <div class="api-status">{{ chatError }}</div>
     </main>
@@ -862,7 +862,7 @@ a:hover{opacity:.7}
       <p>Raw numbers on the left, leadership-ready summary on the right. Regenerate with a new angle any time.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn" data-dc-click="{{ generateReport }}">↻ Generate report</button>
+      <button class="tool-btn" data-action="generateReport">↻ Generate report</button>
       <button class="tool-btn solid">⤓ Download .md</button>
     </div>
   </div>
@@ -923,7 +923,7 @@ a:hover{opacity:.7}
       <div class="report-foot">
         <span>GENERATED 25 AUG 08:41 · CLAUDE SONNET 4.6</span>
         <div style="display:flex;gap:8px">
-          <button class="tool-btn" data-dc-click="{{ generateReport }}" style="padding:6px 12px">↻ New angle</button>
+          <button class="tool-btn" data-action="generateReport" style="padding:6px 12px">↻ New angle</button>
           <button class="tool-btn solid" style="padding:6px 12px">↗ Send to Slack</button>
         </div>
       </div>
@@ -1348,8 +1348,8 @@ class Component extends DCLogic {
     finally { setButtonBusy(button, false); }
   };
   document.addEventListener('click', (event) => {
-    const target = event.target.closest('[data-dc-click]'); if (!target) return;
-    const action = target.getAttribute('data-dc-click') || '';
+    const target = event.target.closest('[data-action]'); if (!target) return;
+    const action = target.getAttribute('data-action') || '';
     const nav = action.match(/go([0-4])/); if (nav) { navigate(Number(nav[1])); return; }
     if (action.includes('toggle')) { target.closest('.chip').classList.toggle('on'); return; }
     if (action.includes('startMatch')) { runIntake(target); return; }
