@@ -1026,7 +1026,7 @@ class Component extends DCLogic {
       setTimeout(() => this.measureTone(), 60);
     });
   }
-  componentDidUpdate(_, prev) {
+  componentDidUpdate(_, prev = {}) {
     if (prev.tab !== this.state.tab) requestAnimationFrame(() => this.measure());
   }
   componentWillUnmount() {
