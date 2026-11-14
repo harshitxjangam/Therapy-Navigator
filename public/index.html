@@ -212,6 +212,12 @@ a:hover{opacity:.7}
 .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
 .field .input{padding:11px 14px;background:var(--cream-2);border:1px solid rgba(58,46,31,.12);border-radius:10px;font-size:14px;color:var(--ink)}
 .field .input.multi{min-height:110px;line-height:1.55}
+.canvas-input,.canvas-select,.canvas-textarea{width:100%;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;line-height:inherit}
+.canvas-select{appearance:auto;cursor:pointer}.canvas-textarea{resize:vertical;min-height:82px;font-family:inherit}
+.api-status{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.05em;color:var(--red);margin-top:10px;min-height:15px}
+.email-draft{margin-top:16px;background:var(--paper);border:1px solid rgba(58,46,31,.12);border-radius:14px;padding:14px 16px;color:var(--ink)}
+.email-draft summary{cursor:pointer;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--ink-2);text-transform:uppercase}
+.email-draft pre{white-space:pre-wrap;font:13px/1.65 'DM Sans',sans-serif;margin:14px 0 0;color:var(--ink)}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
 .chip{padding:6px 12px;border-radius:999px;font-size:12px;background:var(--cream-2);border:1px solid rgba(58,46,31,.12);color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
@@ -325,6 +331,8 @@ a:hover{opacity:.7}
 .email-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
 .email-head h4{font-family:'Instrument Serif',serif;font-size:22px;margin:4px 0 0;font-weight:400}
 .email-body{padding:22px;background:var(--cream-2);border-radius:14px;font-size:13.5px;line-height:1.7;color:var(--ink);flex:1}
+.email-live{white-space:pre-wrap;font-family:'DM Sans',sans-serif}
+.live-report{white-space:pre-wrap;font:13px/1.7 'DM Sans',sans-serif;color:var(--ink);border-top:1px solid rgba(58,46,31,.1);padding-top:18px;margin-top:18px}
 .email-body .subj{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--ink-2);margin-bottom:4px}
 .email-body .subj-line{font-weight:700;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(58,46,31,.1)}
 .email-actions{margin-top:14px;display:flex;gap:8px;align-items:center}
@@ -587,32 +595,32 @@ a:hover{opacity:.7}
       <p>Describe what you're noticing. We'll recommend a therapy discipline in plain language and draft a welcome email. No diagnoses, just a warm next step.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn">↻ Load sample</button>
-      <button class="tool-btn solid">Save draft</button>
+      <button class="tool-btn" onClick="{{ loadIntakeSample }}">↻ Load sample</button>
+      <button class="tool-btn solid" onClick="{{ clearIntake }}">Clear form</button>
     </div>
   </div>
 
   <div class="intake-grid">
     <div class="card">
       <div class="card-tag"><span class="glyph">✚</span> ABOUT THE CHILD</div>
-      <div class="field"><label>Child's first name</label><div class="input">Emma</div></div>
+      <div class="field"><label>Child's first name</label><div class="input"><input class="canvas-input" value="{{ intakeName }}" onInput="{{ setIntakeName }}" placeholder="e.g. Emma"></div></div>
       <div class="two-col">
-        <div class="field"><label>Age range</label><div class="input" style="display:flex;justify-content:space-between">4–6 years<span style="color:var(--ink-2)">▾</span></div></div>
-        <div class="field"><label>Clinic</label><div class="input">Oak Hill · Austin</div></div>
+        <div class="field"><label>Age range</label><div class="input"><select class="canvas-select" value="{{ intakeAge }}" onChange="{{ setIntakeAge }}"><option>Under 2 years</option><option>2–4 years</option><option>4–6 years</option><option>6–10 years</option><option>10–14 years</option><option>14–18 years</option></select></div></div>
+        <div class="field"><label>Clinic</label><div class="input"><input class="canvas-input" value="{{ intakeClinic }}" onInput="{{ setIntakeClinic }}"></div></div>
       </div>
       <div class="field"><label>Areas of concern <span style="color:var(--ink-2);font-weight:400">· tap all that apply</span></label></div>
       <div class="chips">
-        <span class="chip on"><span class="g">✚</span> Speech &amp; language</span>
-        <span class="chip on"><span class="g">✎</span> Fine motor</span>
-        <span class="chip on"><span class="g">☾</span> Sensory sensitivities</span>
-        <span class="chip"><span class="g">↯</span> Gross motor</span>
-        <span class="chip"><span class="g">♥</span> Social &amp; play</span>
-        <span class="chip"><span class="g">◐</span> Feeding</span>
-        <span class="chip"><span class="g">✦</span> Attention</span>
-        <span class="chip" style="opacity:.6">+ 3 more</span>
+        <span class="chip {{ concernSpeechClass }}" onClick="{{ toggleSpeech }}"><span class="g">✚</span> Speech &amp; language</span>
+        <span class="chip {{ concernFineClass }}" onClick="{{ toggleFine }}"><span class="g">✎</span> Fine motor</span>
+        <span class="chip {{ concernSensoryClass }}" onClick="{{ toggleSensory }}"><span class="g">☾</span> Sensory sensitivities</span>
+        <span class="chip {{ concernGrossClass }}" onClick="{{ toggleGross }}"><span class="g">↯</span> Gross motor</span>
+        <span class="chip {{ concernSocialClass }}" onClick="{{ toggleSocial }}"><span class="g">♥</span> Social &amp; play</span>
+        <span class="chip {{ concernFeedingClass }}" onClick="{{ toggleFeeding }}"><span class="g">◐</span> Feeding</span>
+        <span class="chip {{ concernAttentionClass }}" onClick="{{ toggleAttention }}"><span class="g">✦</span> Attention</span>
       </div>
-      <div class="field"><label>In the family's words</label><div class="input multi">Emma is 5 and started kindergarten this fall. Her teacher mentioned that other kids have trouble understanding her. She drops the ends of words and gets frustrated when she has to repeat herself. She also struggles to hold a pencil, and loud spaces overwhelm her.</div></div>
+      <div class="field"><label>In the family's words</label><div class="input multi"><textarea class="canvas-textarea" value="{{ intakeDescription }}" onInput="{{ setIntakeDescription }}" placeholder="Tell us what you've been noticing."></textarea></div></div>
       <button class="submit-btn" onClick="{{ startMatch }}"><span>{{ submitLabel }} <span style="opacity:.5">· {{ submitMeta }}</span></span><span class="arrow">→</span></button>
+      <div class="api-status">{{ intakeError }}</div>
     </div>
 
     <div class="rec-stack {{ matchingClass }}">
@@ -634,12 +642,12 @@ a:hover{opacity:.7}
           </div>
         </div>
         <div class="kicker">✦ RECOMMENDED CARE PLAN · #INT-0421</div>
-        <h2 class="serif">Speech-Language<br><em class="italic">Therapy.</em></h2>
+        <h2 class="serif">{{ intakePrimary }}</h2>
         <div class="rec-badges">
-          <span class="b primary">✚ Primary fit · 94% confidence</span>
-          <span class="b also">◈ Also helpful · OT</span>
+          <span class="b primary">✚ Primary fit</span>
+          <span class="b also">◈ {{ intakeSecondary }}</span>
         </div>
-        <p>Emma's teacher noticed she's dropping word endings and getting frustrated when she has to repeat herself. These are classic signs that speech-language work will help her feel understood. OT will support pencil-grip and sensory pieces alongside.</p>
+        <p>{{ intakeExplanation }}</p>
         <div class="rec-signals">
           <div class="sig"><span class="sig-l">Signals matched</span><span class="sig-v">7 / 9</span></div>
           <div class="sig"><span class="sig-l">Age fit</span><span class="sig-v">4–6 yrs ✓</span></div>
@@ -650,29 +658,30 @@ a:hover{opacity:.7}
       <div class="rec-list">
         <div class="ttl"><h4><span class="g">☾</span> What sessions look like</h4></div>
         <ul>
-          <li><span class="b">1</span>Play-based, 45 minutes, once a week to start</li>
-          <li><span class="b">2</span>Articulation practice woven into stories &amp; games</li>
-          <li><span class="b">3</span>You'll join for the last 10 minutes with a home plan</li>
-          <li><span class="b">4</span>Progress reviewed together at 12 weeks</li>
+          <li><span class="b">1</span>{{ involve1 }}</li>
+          <li><span class="b">2</span>{{ involve2 }}</li>
+          <li><span class="b">3</span>{{ involve3 }}</li>
+          <li><span class="b">4</span>{{ involve4 }}</li>
         </ul>
       </div>
 
       <div class="checklist">
         <div class="checklist-head">
           <h4><span class="g">✎</span> First-visit checklist</h4>
-          <div style="font-size:11px;color:var(--ink-2)">3 of 7 complete</div>
+          <div style="font-size:11px;color:var(--ink-2)">7 things to bring</div>
         </div>
         <div class="progress-bar"><div class="fill"></div></div>
         <ul>
-          <li class="done"><span class="box">✓</span><span>Bring insurance card &amp; ID</span></li>
-          <li class="done"><span class="box">✓</span><span>Complete intake paperwork online</span></li>
-          <li class="done"><span class="box">✓</span><span>Note any recent hearing screening</span></li>
-          <li><span class="box"></span><span>Bring a favorite toy or book</span></li>
-          <li><span class="box"></span><span>Arrive 10 minutes early to settle in</span></li>
-          <li><span class="box"></span><span>Write down 2–3 questions to ask</span></li>
-          <li><span class="box"></span><span>Wear comfortable clothes for movement</span></li>
+          <li><span class="box"></span><span>{{ checklist1 }}</span></li>
+          <li><span class="box"></span><span>{{ checklist2 }}</span></li>
+          <li><span class="box"></span><span>{{ checklist3 }}</span></li>
+          <li><span class="box"></span><span>{{ checklist4 }}</span></li>
+          <li><span class="box"></span><span>{{ checklist5 }}</span></li>
+          <li><span class="box"></span><span>{{ checklist6 }}</span></li>
+          <li><span class="box"></span><span>{{ checklist7 }}</span></li>
         </ul>
       </div>
+      <details class="email-draft"><summary>Draft welcome email</summary><pre>{{ intakeEmail }}</pre></details>
     </div>
   </div>
 </div>
@@ -686,8 +695,8 @@ a:hover{opacity:.7}
       <p>Four families are ready for a status update. Pick a tone; we'll draft each with their specifics. You review, edit, send.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn">↻ Load sample</button>
-      <button class="tool-btn solid">✉ Send batch</button>
+      <button class="tool-btn" onClick="{{ loadWaitlistSample }}">↻ Load sample</button>
+      <button class="tool-btn solid" onClick="{{ generateWaitlist }}">{{ waitlistTopLabel }}</button>
     </div>
   </div>
 
@@ -703,7 +712,7 @@ a:hover{opacity:.7}
         </div>
       </div>
       <div class="setting"><label>Clinic</label><div class="val">Oak Hill · Austin</div></div>
-      <button class="submit-btn" style="width:auto;padding:12px 20px"><span>Draft all 4</span><span class="arrow" style="width:28px;height:28px">→</span></button>
+      <button class="submit-btn" onClick="{{ generateWaitlist }}" style="width:auto;padding:12px 20px"><span>{{ waitlistLabel }}</span><span class="arrow" style="width:28px;height:28px">→</span></button>
     </div>
     <div class="batch-stats">
       <div class="eyebrow" style="color:var(--yellow);opacity:1">BATCH READY</div>
@@ -743,29 +752,22 @@ a:hover{opacity:.7}
     <div class="email-preview">
       <div class="email-head">
         <div>
-          <div class="eyebrow">Draft for Sarah Chen</div>
-          <h4>Emma · 6 weeks waiting</h4>
+          <div class="eyebrow">Draft for {{ waitlistParent }}</div>
+          <h4>{{ waitlistChild }} · {{ waitlistWeeks }} weeks waiting</h4>
         </div>
         <div style="display:flex;gap:6px">
           <button class="tool-btn" style="padding:6px 10px">‹</button>
           <button class="tool-btn" style="padding:6px 10px">›</button>
         </div>
       </div>
-      <div class="email-body">
-        <div class="subj">SUBJECT</div>
-        <div class="subj-line">A quick update on Emma's speech therapy spot</div>
-        <p style="margin:0 0 10px">Hi Sarah,</p>
-        <p style="margin:0 0 10px">I wanted to reach out personally. Six weeks feels long, and I don't want you to think we've forgotten Emma. We haven't.</p>
-        <p style="margin:0 0 10px">She's currently third in line for a Tuesday-or-Thursday afternoon speech slot with one of our pediatric SLPs, and based on how the schedule is opening up, we expect to reach out within the next 2–3 weeks with a start date.</p>
-        <p style="margin:0 0 10px">If anything changes, whether new questions from her teacher, a school evaluation, or you'd like to add OT to the plan, just reply and I'll fold it in.</p>
-        <p style="margin:0">Warmly,<br>The Oak Hill Team</p>
-      </div>
+      <div class="email-body email-live">{{ waitlistEmail }}</div>
       <div class="email-actions">
         <div class="stat">148 WORDS · READS IN ~40 SEC</div>
-        <button class="tool-btn">↻ Regenerate</button>
+        <button class="tool-btn" onClick="{{ generateWaitlist }}">↻ Regenerate</button>
         <button class="tool-btn">⤓ Download</button>
         <button class="tool-btn solid">✓ Approve &amp; queue</button>
       </div>
+      <div class="api-status">{{ waitlistError }}</div>
     </div>
   </div>
 </div>
@@ -779,7 +781,7 @@ a:hover{opacity:.7}
       <p>A grounded chat over your clinic's knowledge base. It'll tell you when a question falls outside. It never guesses about specific coverage or clinical decisions.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn">↻ Clear chat</button>
+      <button class="tool-btn" onClick="{{ clearChat }}">↻ Clear chat</button>
       <button class="tool-btn solid">✚ New thread</button>
     </div>
   </div>
@@ -816,23 +818,20 @@ a:hover{opacity:.7}
       <div class="quick-topics">
         <div class="eyebrow">Quick topics</div>
         <div class="qt-chips">
-          <span class="qt"><span class="g">♥</span> What is OT therapy?</span>
-          <span class="qt"><span class="g">◈</span> How does ABA work?</span>
-          <span class="qt"><span class="g">☾</span> Explain a speech eval</span>
-          <span class="qt"><span class="g">✚</span> Prior auth timing</span>
-          <span class="qt"><span class="g">✎</span> Sensory processing?</span>
+          <span class="qt" onClick="{{ askOT }}"><span class="g">♥</span> What is OT therapy?</span>
+          <span class="qt" onClick="{{ askABA }}"><span class="g">◈</span> How does ABA work?</span>
+          <span class="qt" onClick="{{ askSpeech }}"><span class="g">☾</span> Explain a speech eval</span>
+          <span class="qt" onClick="{{ askAuth }}"><span class="g">✚</span> Prior auth timing</span>
+          <span class="qt" onClick="{{ askSensory }}"><span class="g">✎</span> Sensory processing?</span>
         </div>
       </div>
 
       <div class="messages">
-        <div class="msg msg-u">A dad just called and asked why his son's OT auth is taking so long. How do I explain it without scaring him?</div>
+        <div class="msg msg-u">{{ chatQuestion }}</div>
         <div class="msg msg-a">
           <div class="av"><span class="cross">+</span></div>
           <div class="body">
-            <p>The honest, non-scary version: prior authorization is the insurance company's advance approval for a course of therapy. It usually takes <b>5–15 business days</b>, longer if they request more documentation — and that wait is the single most common gap between eval and first session.</p>
-            <p>You can say something like:</p>
-            <div class="quote">"Your son's paperwork is with your insurance now. They'll usually decide within about two weeks. I'll call you the day we hear, either way. You don't need to chase this."</div>
-            <p>Route specific coverage or dollar questions to the billing team.</p>
+            <p style="white-space:pre-wrap">{{ chatAnswer }}</p>
             <div class="tags">
               <span class="t">✚ INSURANCE · PRIOR AUTH</span>
               <span class="t">☾ PARENT PHRASING</span>
@@ -846,10 +845,10 @@ a:hover{opacity:.7}
       </div>
 
       <div class="chat-input">
-        <div class="field-text">Ask anything about pediatric therapy…</div>
-        <button class="send">↑</button>
-        <button class="send" style="background:var(--yellow);color:var(--ink)">→</button>
+        <input class="canvas-input" value="{{ chatDraft }}" onInput="{{ setChatDraft }}" placeholder="Ask anything about pediatric therapy…">
+        <button class="send" onClick="{{ sendChat }}">→</button>
       </div>
+      <div class="api-status">{{ chatError }}</div>
     </main>
   </div>
 </div>
@@ -863,7 +862,7 @@ a:hover{opacity:.7}
       <p>Raw numbers on the left, leadership-ready summary on the right. Regenerate with a new angle any time.</p>
     </div>
     <div class="page-tools">
-      <button class="tool-btn">↻ Load sample</button>
+      <button class="tool-btn" onClick="{{ generateReport }}">↻ Generate report</button>
       <button class="tool-btn solid">⤓ Download .md</button>
     </div>
   </div>
@@ -924,10 +923,12 @@ a:hover{opacity:.7}
       <div class="report-foot">
         <span>GENERATED 25 AUG 08:41 · CLAUDE SONNET 4.6</span>
         <div style="display:flex;gap:8px">
-          <button class="tool-btn" style="padding:6px 12px">↻ New angle</button>
+          <button class="tool-btn" onClick="{{ generateReport }}" style="padding:6px 12px">↻ New angle</button>
           <button class="tool-btn solid" style="padding:6px 12px">↗ Send to Slack</button>
         </div>
       </div>
+      <div class="live-report">{{ reportOutput }}</div>
+      <div class="api-status">{{ reportError }}</div>
     </div>
   </div>
 </div>
@@ -946,7 +947,33 @@ a:hover{opacity:.7}
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { tab: 0, pillLeft: 5, pillWidth: 100, matching: false, matched: true, matchProgress: 100, tone: 0, tonePillLeft: 3, tonePillWidth: 60, clock: '8:42 AM', nowPct: 8 };
+  state = {
+    tab: 0, pillLeft: 5, pillWidth: 100,
+    matching: false, matched: true, matchProgress: 100,
+    tone: 0, tonePillLeft: 3, tonePillWidth: 60,
+    clock: '8:42 AM', nowPct: 8,
+    intakeName: 'Emma', intakeAge: '4–6 years', intakeClinic: 'Oaklin Lane - Austin',
+    intakeDescription: "Emma is 5 and started kindergarten this fall. Her teacher mentioned that other kids have trouble understanding her. She drops the ends of words and gets frustrated when she has to repeat herself. She also struggles to hold a pencil, and loud spaces overwhelm her.",
+    concerns: ['speech','fine','sensory'], intakeError: '',
+    intakePrimary: 'Speech-Language Therapy.',
+    intakeSecondary: 'Also helpful · Occupational Therapy',
+    intakeExplanation: "Emma's teacher noticed she's dropping word endings and getting frustrated when she has to repeat herself. These are classic signs that speech-language work will help her feel understood. OT will support pencil-grip and sensory pieces alongside.",
+    involve1: 'Play-based, 45 minutes, once a week to start',
+    involve2: 'Articulation practice woven into stories & games',
+    involve3: "You'll join for the last 10 minutes with a home plan",
+    involve4: 'Progress reviewed together at 12 weeks',
+    checklist1: 'Bring insurance card & ID', checklist2: 'Complete intake paperwork online',
+    checklist3: 'Note any recent hearing screening', checklist4: 'Bring a favorite toy or book',
+    checklist5: 'Arrive 10 minutes early to settle in', checklist6: 'Write down 2–3 questions to ask',
+    checklist7: 'Wear comfortable clothes for movement', intakeEmail: '',
+    waitlistLoading: false, waitlistError: '', waitlistLabel: 'Draft all 4', waitlistTopLabel: '✉ Send batch',
+    waitlistChild: 'Emma', waitlistParent: 'Sarah Chen', waitlistWeeks: 6,
+    waitlistEmail: 'Generate this batch to prepare a live, personalized message for every family.',
+    chatDraft: '', chatError: '',
+    chatQuestion: "A dad just called and asked why his son's OT auth is taking so long. How do I explain it without scaring him?",
+    chatAnswer: "Ask a question below or choose a quick topic. The assistant answers from the Oaklin Lane knowledge base.",
+    chatHistory: [], reportLoading: false, reportError: '', reportOutput: ''
+  };
   setTabsRef = (el) => {
     this.tabsEl = el;
     if (el) requestAnimationFrame(() => this.measure());
@@ -1029,20 +1056,136 @@ class Component extends DCLogic {
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-  startMatch = () => {
+  setIntakeName = (e) => this.setState({ intakeName: e.target.value });
+  setIntakeAge = (e) => this.setState({ intakeAge: e.target.value });
+  setIntakeClinic = (e) => this.setState({ intakeClinic: e.target.value });
+  setIntakeDescription = (e) => this.setState({ intakeDescription: e.target.value });
+  toggleConcern = (name) => {
+    const concerns = this.state.concerns.includes(name)
+      ? this.state.concerns.filter(x => x !== name)
+      : [...this.state.concerns, name];
+    this.setState({ concerns });
+  };
+  loadIntakeSample = () => this.setState({
+    intakeName: 'Emma', intakeAge: '4–6 years', intakeClinic: 'Oaklin Lane - Austin',
+    intakeDescription: "Emma is 5 and started kindergarten this fall. Her teacher mentioned that other kids have trouble understanding her. She drops the ends of words and gets frustrated when she has to repeat herself. She also struggles to hold a pencil, and loud spaces overwhelm her.",
+    concerns: ['speech','fine','sensory'], intakeError: ''
+  });
+  clearIntake = () => this.setState({
+    intakeName: '', intakeAge: '4–6 years', intakeClinic: 'Oaklin Lane - Austin',
+    intakeDescription: '', concerns: [], intakeError: ''
+  });
+  startMatch = async () => {
     if (this.state.matching) return;
-    if (this._matchInterval) clearInterval(this._matchInterval);
-    this.setState({ matching: true, matched: false, matchProgress: 0 });
-    const start = Date.now();
-    const dur = 2600;
-    this._matchInterval = setInterval(() => {
-      const p = Math.min(100, ((Date.now() - start) / dur) * 100);
-      this.setState({ matchProgress: p });
-      if (p >= 100) {
-        clearInterval(this._matchInterval);
-        this.setState({ matching: false, matched: true });
-      }
-    }, 40);
+    const concernMap = {
+      speech: 'Speech and language delays',
+      fine: 'Fine motor skills (writing, buttons, zippers)',
+      sensory: 'Sensory sensitivities (sounds, textures, lights)',
+      gross: 'Gross motor skills (walking, balance, coordination)',
+      social: 'Social interaction and play',
+      feeding: 'Feeding or swallowing difficulties',
+      attention: 'Attention and focus'
+    };
+    if (!this.state.concerns.length && !this.state.intakeDescription.trim()) {
+      this.setState({ intakeError: 'Choose an area of concern or add a short note first.' });
+      return;
+    }
+    this.setState({ matching: true, matched: false, matchProgress: 14, intakeError: '' });
+    const pulse = setTimeout(() => this.setState({ matchProgress: 58 }), 700);
+    try {
+      const response = await fetch('/api/intake', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          child_name: this.state.intakeName,
+          age_range: this.state.intakeAge,
+          clinic: this.state.intakeClinic,
+          description: this.state.intakeDescription,
+          concerns: this.state.concerns.map(x => concernMap[x])
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not generate a care plan.');
+      const involves = [...(data.involves || []), '', '', '', ''];
+      const checklist = [...(data.checklist || []), '', '', '', '', '', '', ''];
+      this.setState({
+        matching: false, matched: true, matchProgress: 100,
+        intakePrimary: data.primary || 'Recommended care plan',
+        intakeSecondary: data.secondary ? `Also helpful · ${data.secondary}` : 'Tailored care plan',
+        intakeExplanation: data.explanation || '',
+        involve1: involves[0], involve2: involves[1], involve3: involves[2], involve4: involves[3],
+        checklist1: checklist[0], checklist2: checklist[1], checklist3: checklist[2], checklist4: checklist[3],
+        checklist5: checklist[4], checklist6: checklist[5], checklist7: checklist[6],
+        intakeEmail: data.email || ''
+      });
+    } catch (err) {
+      this.setState({ matching: false, matched: true, matchProgress: 100, intakeError: err.message || 'Something went wrong. Try again.' });
+    } finally {
+      clearTimeout(pulse);
+    }
+  };
+  loadWaitlistSample = () => this.setState({ waitlistError: '', waitlistLabel: 'Draft all 4', waitlistTopLabel: '✉ Send batch' });
+  generateWaitlist = async () => {
+    if (this.state.waitlistLoading) return;
+    const families = [
+      { child: 'Emma', parent: 'Sarah Chen', weeks: 6, therapy: 'Speech' },
+      { child: 'Marcus', parent: 'Danielle Reed', weeks: 12, therapy: 'OT' },
+      { child: 'Aisha', parent: '', weeks: 3, therapy: 'PT' },
+      { child: 'Liam', parent: 'Jordan Alvarez', weeks: 18, therapy: 'ABA' }
+    ];
+    this.setState({ waitlistLoading: true, waitlistError: '', waitlistLabel: 'Writing drafts…', waitlistTopLabel: 'Writing…' });
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ families, clinic: 'Oaklin Lane - Austin', tone: ['Warm and reassuring', 'Professional and clear', 'Urgent (action required)'][this.state.tone] })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not create the waitlist drafts.');
+      const first = data.emails && data.emails[0];
+      if (!first || first.error) throw new Error((first && first.error) || 'No email was returned.');
+      this.setState({ waitlistLoading: false, waitlistLabel: '4 drafts ready', waitlistTopLabel: '✓ 4 drafts ready', waitlistChild: first.child, waitlistParent: 'Sarah Chen', waitlistWeeks: first.weeks, waitlistEmail: first.email });
+    } catch (err) {
+      this.setState({ waitlistLoading: false, waitlistLabel: 'Draft all 4', waitlistTopLabel: '✉ Send batch', waitlistError: err.message || 'Something went wrong. Try again.' });
+    }
+  };
+  setChatDraft = (e) => this.setState({ chatDraft: e.target.value });
+  askQuick = (question) => {
+    this.setState({ chatDraft: question }, () => this.sendChat());
+  };
+  clearChat = () => this.setState({ chatDraft: '', chatError: '', chatHistory: [], chatQuestion: 'Start a new conversation whenever you need a quick answer.', chatAnswer: 'Ask a question below or choose a quick topic.' });
+  sendChat = async () => {
+    const question = this.state.chatDraft.trim();
+    if (!question) return;
+    this.setState({ chatError: '', chatQuestion: question, chatAnswer: 'Thinking…', chatDraft: '' });
+    const history = [...this.state.chatHistory, { role: 'user', content: question }];
+    try {
+      const response = await fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not answer that question.');
+      this.setState({ chatAnswer: data.answer, chatHistory: [...history, { role: 'assistant', content: data.answer }] });
+    } catch (err) {
+      this.setState({ chatAnswer: '', chatError: err.message || 'Something went wrong. Try again.' });
+    }
+  };
+  generateReport = async () => {
+    if (this.state.reportLoading) return;
+    this.setState({ reportLoading: true, reportError: '', reportOutput: 'Generating leadership-ready summary…' });
+    try {
+      const response = await fetch('/api/report', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clinic: 'Oaklin Lane - Austin', period: 'Week of Aug 18, 2026',
+          completed: 284, canceled: 41, evals: 12, referrals: 19, waitlist: 63,
+          auth_approved: 14, auth_pending: 22, auth_denied: 5, therapists: 11, utilization: 78,
+          notes: '2 therapists out sick Wednesday. New sensory gym equipment arrived. Front desk flagged authorization delays.',
+          compare: true, prev_completed: 301, prev_waitlist: 57, prev_referrals: 14
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not generate the report.');
+      this.setState({ reportLoading: false, reportOutput: data.report });
+    } catch (err) {
+      this.setState({ reportLoading: false, reportOutput: '', reportError: err.message || 'Something went wrong. Try again.' });
+    }
   };
   renderVals() {
     const t = this.state.tab;
@@ -1053,16 +1196,51 @@ class Component extends DCLogic {
     const { tone, tonePillLeft, tonePillWidth, clock, nowPct } = this.state;
     const tonePillStyle = `transform:translateX(${tonePillLeft - 3}px);width:${tonePillWidth}px;left:3px;height:calc(100% - 6px)`;
     const toneCls = i => (tone === i ? 'on' : '');
+    const concernCls = name => this.state.concerns.includes(name) ? 'on' : '';
     return {
       pillStyle,
       progressStyle,
       matchingClass: matching ? 'is-matching' : (matched ? 'is-matched' : ''),
-      matchLabel: matching ? `MATCHING · ${Math.round(matchProgress)}%` : (matched ? '✦ MATCHED · 6.4s' : 'READY'),
-      submitLabel: matching ? 'Analyzing Emma\'s needs…' : 'Find the right therapy',
-      submitMeta: matching ? `${Math.round(matchProgress)}%` : '~ 8 sec',
+      matchLabel: matching ? `MATCHING · ${Math.round(matchProgress)}%` : (matched ? '✦ CARE PLAN READY' : 'READY'),
+      submitLabel: matching ? 'Analyzing needs…' : 'Find the right therapy',
+      submitMeta: matching ? `${Math.round(matchProgress)}%` : 'live AI',
       setTabsRef: this.setTabsRef,
       setToneRef: this.setToneRef,
       startMatch: this.startMatch,
+      loadIntakeSample: this.loadIntakeSample, clearIntake: this.clearIntake,
+      intakeName: this.state.intakeName, intakeAge: this.state.intakeAge,
+      intakeClinic: this.state.intakeClinic, intakeDescription: this.state.intakeDescription,
+      intakeError: this.state.intakeError, intakePrimary: this.state.intakePrimary,
+      intakeSecondary: this.state.intakeSecondary, intakeExplanation: this.state.intakeExplanation,
+      involve1: this.state.involve1, involve2: this.state.involve2, involve3: this.state.involve3, involve4: this.state.involve4,
+      checklist1: this.state.checklist1, checklist2: this.state.checklist2, checklist3: this.state.checklist3,
+      checklist4: this.state.checklist4, checklist5: this.state.checklist5, checklist6: this.state.checklist6, checklist7: this.state.checklist7,
+      intakeEmail: this.state.intakeEmail,
+      setIntakeName: this.setIntakeName, setIntakeAge: this.setIntakeAge,
+      setIntakeClinic: this.setIntakeClinic, setIntakeDescription: this.setIntakeDescription,
+      toggleSpeech: () => this.toggleConcern('speech'), toggleFine: () => this.toggleConcern('fine'),
+      toggleSensory: () => this.toggleConcern('sensory'), toggleGross: () => this.toggleConcern('gross'),
+      toggleSocial: () => this.toggleConcern('social'), toggleFeeding: () => this.toggleConcern('feeding'),
+      toggleAttention: () => this.toggleConcern('attention'),
+      concernSpeechClass: concernCls('speech'), concernFineClass: concernCls('fine'),
+      concernSensoryClass: concernCls('sensory'), concernGrossClass: concernCls('gross'),
+      concernSocialClass: concernCls('social'), concernFeedingClass: concernCls('feeding'),
+      concernAttentionClass: concernCls('attention'),
+      waitlistLabel: this.state.waitlistLabel, waitlistTopLabel: this.state.waitlistTopLabel,
+      waitlistChild: this.state.waitlistChild, waitlistParent: this.state.waitlistParent,
+      waitlistWeeks: this.state.waitlistWeeks, waitlistEmail: this.state.waitlistEmail,
+      waitlistError: this.state.waitlistError, generateWaitlist: this.generateWaitlist,
+      loadWaitlistSample: this.loadWaitlistSample,
+      chatDraft: this.state.chatDraft, chatError: this.state.chatError,
+      chatQuestion: this.state.chatQuestion, chatAnswer: this.state.chatAnswer,
+      setChatDraft: this.setChatDraft, sendChat: this.sendChat, clearChat: this.clearChat,
+      askOT: () => this.askQuick('What is OT therapy?'),
+      askABA: () => this.askQuick('How does ABA work?'),
+      askSpeech: () => this.askQuick('What is a speech evaluation?'),
+      askAuth: () => this.askQuick('How long does prior authorization take?'),
+      askSensory: () => this.askQuick('What is sensory processing disorder?'),
+      reportOutput: this.state.reportOutput, reportError: this.state.reportError,
+      generateReport: this.generateReport,
       tonePillStyle,
       tone0cls: toneCls(0), tone1cls: toneCls(1), tone2cls: toneCls(2),
       setTone0: () => this.setTone(0), setTone1: () => this.setTone(1), setTone2: () => this.setTone(2),
