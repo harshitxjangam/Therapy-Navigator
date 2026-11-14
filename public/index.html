@@ -1442,6 +1442,11 @@ class Component extends DCLogic {
     const intakeSelect = page(1)?.querySelector('select');
     if (intakeSelect) intakeSelect.value = '4–6 years';
     refreshCalendar();
+    // Claude Design mounts its canvas just after the window load event.
+    // Refresh again once that mount has completed so first-time visitors
+    // never see the original August placeholder.
+    setTimeout(refreshCalendar, 250);
+    setTimeout(refreshCalendar, 1000);
     setInterval(refreshCalendar, 60000);
     navigate(0);
   });
