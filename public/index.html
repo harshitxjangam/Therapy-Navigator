@@ -333,6 +333,10 @@ a:hover{opacity:.7}
 .email-body{padding:22px;background:var(--cream-2);border-radius:14px;font-size:13.5px;line-height:1.7;color:var(--ink);flex:1}
 .email-live{white-space:pre-wrap;font-family:'DM Sans',sans-serif}
 .live-report{white-space:pre-wrap;font:13px/1.7 'DM Sans',sans-serif;color:var(--ink);border-top:1px solid rgba(58,46,31,.1);padding-top:18px;margin-top:18px}
+.tour-overlay{position:fixed;inset:0;z-index:1000;background:rgba(58,46,31,.48);backdrop-filter:blur(5px);display:grid;place-items:center;padding:20px}
+.tour-card{width:min(560px,100%);background:var(--paper);border-radius:24px;padding:34px;position:relative;box-shadow:0 28px 80px rgba(58,46,31,.35);border:1px solid rgba(58,46,31,.12)}
+.tour-card h2{font-size:42px;line-height:.95;margin:12px 0 20px}.tour-card ol{padding-left:21px;margin:0 0 26px;color:var(--ink-2);line-height:1.55}.tour-card li{margin:10px 0}.tour-card b{color:var(--ink)}
+.tour-close{position:absolute;right:16px;top:13px;border:0;background:transparent;color:var(--ink);font-size:28px;cursor:pointer}
 .email-body .subj{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--ink-2);margin-bottom:4px}
 .email-body .subj-line{font-weight:700;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(58,46,31,.1)}
 .email-actions{margin-top:14px;display:flex;gap:8px;align-items:center}
@@ -450,7 +454,7 @@ a:hover{opacity:.7}
     <button class="tab {{ tabClass4 }}" data-action="go4"><span class="ico">◈</span> Report</button>
   </div>
   <div class="nav-cta">
-    <button class="nav-btn">Get Started</button>
+    <button class="nav-btn" data-action="go1">Get Started</button>
   </div>
 </nav>
 
@@ -465,7 +469,7 @@ a:hover{opacity:.7}
       <p>Good morning, Maya. Three families are ready for outreach, one intake is waiting on your read-through, and the weekly report is due Friday. Everything the clinic asked of you, in one calm place.</p>
       <div class="hero-actions">
         <button class="btn-primary" data-action="go1">Start a new intake <span class="arrow">→</span></button>
-        <button class="btn-ghost">Watch 60-sec tour</button>
+        <button class="btn-ghost" data-action="watchTour">Watch 60-sec tour</button>
       </div>
       <div class="hero-stats">
         <div class="s"><div class="n">63</div><div class="l">FAMILIES WAITING</div></div>
@@ -603,10 +607,10 @@ a:hover{opacity:.7}
   <div class="intake-grid">
     <div class="card">
       <div class="card-tag"><span class="glyph">✚</span> ABOUT THE CHILD</div>
-      <div class="field"><label>Child's first name</label><div class="input"><input class="canvas-input" value="{{ intakeName }}" data-dc-input="{{ setIntakeName }}" placeholder="e.g. Emma"></div></div>
+      <div class="field"><label>Child's first name</label><div class="input"><input class="canvas-input" defaultValue="{{ intakeName }}" data-dc-input="{{ setIntakeName }}" placeholder="e.g. Emma"></div></div>
       <div class="two-col">
-        <div class="field"><label>Age range</label><div class="input"><select class="canvas-select" value="{{ intakeAge }}" data-dc-change="{{ setIntakeAge }}"><option>Under 2 years</option><option>2–4 years</option><option>4–6 years</option><option>6–10 years</option><option>10–14 years</option><option>14–18 years</option></select></div></div>
-        <div class="field"><label>Clinic</label><div class="input"><input class="canvas-input" value="{{ intakeClinic }}" data-dc-input="{{ setIntakeClinic }}"></div></div>
+        <div class="field"><label>Age range</label><div class="input"><select class="canvas-select" defaultValue="{{ intakeAge }}" data-dc-change="{{ setIntakeAge }}"><option>Under 2 years</option><option>2–4 years</option><option>4–6 years</option><option>6–10 years</option><option>10–14 years</option><option>14–18 years</option></select></div></div>
+        <div class="field"><label>Clinic</label><div class="input"><input class="canvas-input" defaultValue="{{ intakeClinic }}" data-dc-input="{{ setIntakeClinic }}"></div></div>
       </div>
       <div class="field"><label>Areas of concern <span style="color:var(--ink-2);font-weight:400">· tap all that apply</span></label></div>
       <div class="chips">
@@ -618,7 +622,7 @@ a:hover{opacity:.7}
         <span class="chip {{ concernFeedingClass }}" data-action="toggleFeeding"><span class="g">◐</span> Feeding</span>
         <span class="chip {{ concernAttentionClass }}" data-action="toggleAttention"><span class="g">✦</span> Attention</span>
       </div>
-      <div class="field"><label>In the family's words</label><div class="input multi"><textarea class="canvas-textarea" value="{{ intakeDescription }}" data-dc-input="{{ setIntakeDescription }}" placeholder="Tell us what you've been noticing."></textarea></div></div>
+      <div class="field"><label>In the family's words</label><div class="input multi"><textarea class="canvas-textarea" defaultValue="{{ intakeDescription }}" data-dc-input="{{ setIntakeDescription }}" placeholder="Tell us what you've been noticing."></textarea></div></div>
       <button class="submit-btn" data-action="startMatch"><span>{{ submitLabel }} <span style="opacity:.5">· {{ submitMeta }}</span></span><span class="arrow">→</span></button>
       <div class="api-status">{{ intakeError }}</div>
     </div>
@@ -745,7 +749,7 @@ a:hover{opacity:.7}
           <div><div class="name">Liam Alvarez</div><div class="sub">◈ ABA · 18 wks · parent Jordan</div></div>
           <div class="badge warn"><span>✚</span> LONG WAIT</div>
         </div>
-        <button class="add-family">+ Add another family</button>
+        <button class="add-family" data-action="addFamily">+ Add another family</button>
       </div>
     </div>
 
@@ -764,8 +768,8 @@ a:hover{opacity:.7}
       <div class="email-actions">
         <div class="stat">148 WORDS · READS IN ~40 SEC</div>
         <button class="tool-btn" data-action="generateWaitlist">↻ Regenerate</button>
-        <button class="tool-btn">⤓ Download</button>
-        <button class="tool-btn solid">✓ Approve &amp; queue</button>
+        <button class="tool-btn" data-action="downloadWaitlist">⤓ Download</button>
+        <button class="tool-btn solid" data-action="approveWaitlist">✓ Approve &amp; queue</button>
       </div>
       <div class="api-status">{{ waitlistError }}</div>
     </div>
@@ -782,7 +786,7 @@ a:hover{opacity:.7}
     </div>
     <div class="page-tools">
       <button class="tool-btn" data-action="clearChat">↻ Clear chat</button>
-      <button class="tool-btn solid">✚ New thread</button>
+      <button class="tool-btn solid" data-action="newThread">✚ New thread</button>
     </div>
   </div>
 
@@ -845,7 +849,7 @@ a:hover{opacity:.7}
       </div>
 
       <div class="chat-input">
-        <input class="canvas-input" value="{{ chatDraft }}" data-dc-input="{{ setChatDraft }}" placeholder="Ask anything about pediatric therapy…">
+        <input class="canvas-input" defaultValue="{{ chatDraft }}" data-dc-input="{{ setChatDraft }}" placeholder="Ask anything about pediatric therapy…">
         <button class="send" data-action="sendChat">→</button>
       </div>
       <div class="api-status">{{ chatError }}</div>
@@ -863,7 +867,7 @@ a:hover{opacity:.7}
     </div>
     <div class="page-tools">
       <button class="tool-btn" data-action="generateReport">↻ Generate report</button>
-      <button class="tool-btn solid">⤓ Download .md</button>
+      <button class="tool-btn solid" data-action="downloadReport">⤓ Download .md</button>
     </div>
   </div>
 
@@ -924,7 +928,7 @@ a:hover{opacity:.7}
         <span>GENERATED 25 AUG 08:41 · CLAUDE SONNET 4.6</span>
         <div style="display:flex;gap:8px">
           <button class="tool-btn" data-action="generateReport" style="padding:6px 12px">↻ New angle</button>
-          <button class="tool-btn solid" style="padding:6px 12px">↗ Send to Slack</button>
+          <button class="tool-btn solid" data-action="shareReport" style="padding:6px 12px">↗ Share summary</button>
         </div>
       </div>
       <div class="live-report">{{ reportOutput }}</div>
@@ -1278,6 +1282,32 @@ class Component extends DCLogic {
     if (busy) { button.dataset.originalText = button.textContent; button.disabled = true; button.style.opacity = '.7'; button.textContent = label; }
     else { button.disabled = false; button.style.opacity = ''; if (button.dataset.originalText) button.textContent = button.dataset.originalText; }
   };
+  const download = (filename, text) => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+    link.download = filename; link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+  };
+  const showTour = () => {
+    const existing = document.querySelector('.tour-overlay'); if (existing) existing.remove();
+    const overlay = document.createElement('div'); overlay.className = 'tour-overlay';
+    overlay.innerHTML = `<div class="tour-card"><button class="tour-close" aria-label="Close tour">×</button><div class="eyebrow">THERAPYNAVIGATOR · QUICK TOUR</div><h2 class="serif">One calm workspace<br>for the care journey.</h2><ol><li><b>Start with intake.</b> Turn family concerns into a warm therapy recommendation and welcome email.</li><li><b>Keep families informed.</b> Draft personalized waitlist updates in one batch.</li><li><b>Support the team.</b> Ask operational and parent-communication questions any time.</li><li><b>Close the week clearly.</b> Generate a leadership-ready operations summary.</li></ol><button class="btn-primary" data-tour-start>Start with an intake <span class="arrow">→</span></button></div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (event) => { if (event.target === overlay || event.target.closest('.tour-close')) overlay.remove(); if (event.target.closest('[data-tour-start]')) { overlay.remove(); navigate(1); } });
+  };
+  const loadIntakeSample = () => {
+    const p = page(1); const inputs = p.querySelectorAll('.canvas-input');
+    inputs[0].value = 'Emma'; inputs[1].value = 'Oaklin Lane - Austin'; p.querySelector('select').value = '4–6 years';
+    p.querySelector('textarea').value = "Emma is 5 and started kindergarten this fall. Her teacher says other kids have trouble understanding her. She gets frustrated when repeating herself and loud spaces overwhelm her.";
+    p.querySelectorAll('.chip').forEach((chip, i) => chip.classList.toggle('on', i < 3));
+    setText(p.querySelector('.api-status'), 'Sample details loaded.');
+  };
+  const clearIntake = () => {
+    const p = page(1); const inputs = p.querySelectorAll('.canvas-input');
+    inputs[0].value = ''; inputs[1].value = 'Oaklin Lane - Austin'; p.querySelector('select').value = '4–6 years'; p.querySelector('textarea').value = '';
+    p.querySelectorAll('.chip').forEach(chip => chip.classList.remove('on'));
+    setText(p.querySelector('.api-status'), 'Form cleared. Add a concern or a short note to begin.');
+  };
   const navigate = (index) => {
     pages().forEach((item, i) => item.classList.toggle('active', i === index));
     document.querySelectorAll('button.tab').forEach((item, i) => item.classList.toggle('active', i === index));
@@ -1293,16 +1323,17 @@ class Component extends DCLogic {
   const runIntake = async (button) => {
     const p = page(1); const inputs = p.querySelectorAll('.canvas-input');
     const status = p.querySelector('.api-status');
-    const selected = [...p.querySelectorAll('.chip.on')].map((_, index) => concerns[[...p.querySelectorAll('.chip')].indexOf(p.querySelectorAll('.chip.on')[index])]);
+    const selected = [...p.querySelectorAll('.chip')].filter(chip => chip.classList.contains('on')).map(chip => concerns[[...p.querySelectorAll('.chip')].indexOf(chip)]);
     const description = p.querySelector('textarea').value.trim();
     if (!selected.length && !description) { setText(status, 'Choose an area of concern or add a short note first.'); return; }
     setText(status, 'Analyzing needs with Claude…'); setButtonBusy(button, true, 'Analyzing needs…');
     try {
       const data = await api('/api/intake', { child_name: inputs[0].value, age_range: p.querySelector('select').value, clinic: inputs[1].value, description, concerns: selected });
       const involves = data.involves || []; const checklist = data.checklist || [];
-      setText(p.querySelector('.rec-hero h2'), data.primary || 'Recommended care plan');
+      const fallback = data.raw || 'The care team will review this recommendation with your family.';
+      setText(p.querySelector('.rec-hero h2'), data.primary || 'Personalized care plan');
       setText(p.querySelector('.rec-badges .also'), data.secondary ? `◈ Also helpful · ${data.secondary}` : '◈ Tailored care plan');
-      setText(p.querySelector('.rec-hero p'), data.explanation);
+      setText(p.querySelector('.rec-hero p'), data.explanation || fallback);
       p.querySelectorAll('.rec-list li').forEach((item, i) => setText(item.lastChild, involves[i] || ''));
       p.querySelectorAll('.checklist li span:last-child').forEach((item, i) => setText(item, checklist[i] || ''));
       setText(p.querySelector('.email-draft pre'), data.email);
@@ -1351,11 +1382,15 @@ class Component extends DCLogic {
     const target = event.target.closest('[data-action]'); if (!target) return;
     const action = target.getAttribute('data-action') || '';
     const nav = action.match(/go([0-4])/); if (nav) { navigate(Number(nav[1])); return; }
+    if (action === 'watchTour') { showTour(); return; }
+    if (action === 'loadIntakeSample') { loadIntakeSample(); return; }
+    if (action === 'clearIntake') { clearIntake(); return; }
     if (action.includes('toggle')) { target.closest('.chip').classList.toggle('on'); return; }
     if (action.includes('startMatch')) { runIntake(target); return; }
     if (action.includes('generateWaitlist')) { runWaitlist(target); return; }
     if (action.includes('setTone')) { tone = Number(action.match(/setTone(\d)/)?.[1] || 0); target.parentElement.querySelectorAll('span').forEach((item, i) => item.classList.toggle('on', i === tone)); return; }
     if (action.includes('clearChat')) { chatHistory = []; setText(page(3).querySelector('.msg-a .body p'), 'Ask a question below or choose a quick topic.'); return; }
+    if (action === 'newThread') { chatHistory = []; page(3).querySelector('.chat-input input').value = ''; setText(page(3).querySelector('.msg-u'), 'Start a new conversation whenever you need a quick answer.'); setText(page(3).querySelector('.msg-a .body p'), 'Ask a question below or choose a quick topic.'); return; }
     if (action.includes('askOT')) return runChat('What is OT therapy?');
     if (action.includes('askABA')) return runChat('How does ABA work?');
     if (action.includes('askSpeech')) return runChat('What is a speech evaluation?');
@@ -1363,6 +1398,11 @@ class Component extends DCLogic {
     if (action.includes('askSensory')) return runChat('What is sensory processing disorder?');
     if (action.includes('sendChat')) return runChat();
     if (action.includes('generateReport')) return runReport(target);
+    if (action === 'addFamily') { setText(page(2).querySelector('.api-status'), 'This demo batch already contains four families. Generate drafts to preview the outreach workflow.'); return; }
+    if (action === 'downloadWaitlist') { download('therapy-navigator-waitlist-email.txt', page(2).querySelector('.email-live').textContent); return; }
+    if (action === 'approveWaitlist') { setText(page(2).querySelector('.api-status'), 'Draft approved and marked ready for your team to send.'); return; }
+    if (action === 'downloadReport') { download('therapy-navigator-operations-report.md', page(4).querySelector('.live-report').textContent || page(4).querySelector('.report-panel').innerText); return; }
+    if (action === 'shareReport') { navigator.clipboard?.writeText(page(4).querySelector('.live-report').textContent || page(4).querySelector('.report-panel').innerText); setText(page(4).querySelector('.api-status'), 'Summary copied — paste it into Slack or email.'); return; }
   });
   document.addEventListener('keydown', (event) => { if (event.key === 'Enter' && event.target.matches('.chat-input input')) { event.preventDefault(); runChat(); } });
   window.addEventListener('load', () => navigate(0));

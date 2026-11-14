@@ -88,6 +88,9 @@ def intake(req: IntakeRequest):
         "first_appointment": parsed.get("FIRST_APPOINTMENT", ""),
         "checklist": numbered_items(parsed.get("CHECKLIST", "")),
         "email": parsed.get("WELCOME_EMAIL", "").strip(),
+        # Preserve the original answer as a display fallback when a model uses
+        # an unexpected label format.
+        "raw": raw.strip(),
     }
 
 
