@@ -1026,12 +1026,6 @@ class Component extends DCLogic {
       setTimeout(() => this.measureTone(), 60);
     });
   }
-  componentDidUpdate(_, prev = {}) {
-    // dc-runtime passes null in one update path (not undefined), so the
-    // default parameter alone is not enough to make this lifecycle safe.
-    const previous = prev || {};
-    if (previous.tab !== this.state.tab) requestAnimationFrame(() => this.measure());
-  }
   componentWillUnmount() {
     window.removeEventListener('resize', this._m);
     if (this._matchInterval) clearInterval(this._matchInterval);
