@@ -6,6 +6,7 @@ public/ is served alongside it.
 """
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 from fastapi import FastAPI
@@ -119,8 +120,7 @@ def waitlist(req: WaitlistRequest):
     if len(valid) > 10:
         return fail("Up to 10 families per batch.", 400)
 
-    emails = []
-    for family in valid:
+    def draft_email(family):
         system_prompt = prompts.WAITLIST_TEMPLATE.format(
             clinic=req.clinic.strip() or "our clinic",
             child=str(family.get("child", "")).strip(),
@@ -138,16 +138,19 @@ def waitlist(req: WaitlistRequest):
         except ClaudeError as exc:
             body, error = "", str(exc)
 
-        emails.append(
-            {
-                "child": str(family.get("child", "")).strip(),
-                "therapy": family.get("therapy", "Speech"),
-                "weeks": int(family.get("weeks", 4)),
-                "email": body,
-                "error": error,
-                "words": len(body.split()),
-            }
-        )
+        return {
+            "child": str(family.get("child", "")).strip(),
+            "therapy": family.get("therapy", "Speech"),
+            "weeks": int(family.get("weeks", 4)),
+            "email": body,
+            "error": error,
+            "words": len(body.split()),
+        }
+
+    # A batch is independent per family. Run requests concurrently so a normal
+    # four-family draft stays comfortably inside a serverless request window.
+    with ThreadPoolExecutor(max_workers=min(4, len(valid))) as executor:
+        emails = list(executor.map(draft_email, valid))
 
     return {"emails": emails}
 

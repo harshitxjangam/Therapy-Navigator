@@ -1405,7 +1405,13 @@ class Component extends DCLogic {
     if (action === 'shareReport') { navigator.clipboard?.writeText(page(4).querySelector('.live-report').textContent || page(4).querySelector('.report-panel').innerText); setText(page(4).querySelector('.api-status'), 'Summary copied — paste it into Slack or email.'); return; }
   });
   document.addEventListener('keydown', (event) => { if (event.key === 'Enter' && event.target.matches('.chat-input input')) { event.preventDefault(); runChat(); } });
-  window.addEventListener('load', () => navigate(0));
+  window.addEventListener('load', () => {
+    // The design runtime lowercases defaultValue on select elements. Set the
+    // intended demo value once, while keeping the field fully user-editable.
+    const intakeSelect = page(1)?.querySelector('select');
+    if (intakeSelect) intakeSelect.value = '4–6 years';
+    navigate(0);
+  });
 })();
 </script>
 </body>
