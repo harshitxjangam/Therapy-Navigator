@@ -1378,6 +1378,37 @@ class Component extends DCLogic {
     } catch (error) { setText(output, ''); setText(status, error.message); }
     finally { setButtonBusy(button, false); }
   };
+  const refreshCalendar = () => {
+    const now = new Date();
+    const home = page(0); if (!home) return;
+    const time = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(now);
+    const longDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
+    const shortDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric' }).format(now);
+    const month = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(now).toUpperCase();
+    const eyebrow = home.querySelector('.hero-eyebrow');
+    if (eyebrow) eyebrow.innerHTML = `<span class="dot"></span> ${longDate} · ${time}`;
+    setText(home.querySelector('.cal-month'), month);
+    setText(home.querySelector('.cal-today'), shortDate);
+    setText(home.querySelector('.cc-time'), time);
+    setText(home.querySelector('.now-lbl'), `NOW · ${time}`);
+    const monday = new Date(now); monday.setHours(0, 0, 0, 0); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    home.querySelectorAll('.cw-day').forEach((dayEl, index) => {
+      const date = new Date(monday); date.setDate(monday.getDate() + index);
+      setText(dayEl.querySelector('.d'), new Intl.DateTimeFormat(undefined, { weekday: 'narrow' }).format(date));
+      setText(dayEl.querySelector('.n'), date.getDate());
+      const isToday = date.toDateString() === now.toDateString();
+      dayEl.classList.toggle('is-today', isToday);
+      dayEl.classList.toggle('dim', date.getDay() === 0 || date.getDay() === 6);
+    });
+    home.querySelectorAll('.cc-bar-lbls span').forEach((label, index) => {
+      const date = new Date(monday); date.setDate(monday.getDate() + index);
+      setText(label, new Intl.DateTimeFormat(undefined, { weekday: 'narrow' }).format(date));
+      label.classList.toggle('on', date.toDateString() === now.toDateString());
+    });
+    const minutes = now.getHours() * 60 + now.getMinutes();
+    const percent = Math.max(2, Math.min(97, ((minutes - 480) / 600) * 100));
+    const nowLine = home.querySelector('.now-line'); if (nowLine) nowLine.style.top = `${percent}%`;
+  };
   document.addEventListener('click', (event) => {
     const target = event.target.closest('[data-action]'); if (!target) return;
     const action = target.getAttribute('data-action') || '';
@@ -1410,6 +1441,8 @@ class Component extends DCLogic {
     // intended demo value once, while keeping the field fully user-editable.
     const intakeSelect = page(1)?.querySelector('select');
     if (intakeSelect) intakeSelect.value = '4–6 years';
+    refreshCalendar();
+    setInterval(refreshCalendar, 60000);
     navigate(0);
   });
 })();
